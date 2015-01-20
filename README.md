@@ -37,9 +37,9 @@ data ColumnOrdering = InOrdering | CustomOrdering (JPath -> JPath -> Ordering)
 
 data TableStyle = 
   TableStyle { 
-    table   :: Markup -> Markup,
+    table   :: Level -> Markup -> Markup,
     cell    :: JSemantic -> Markup -> Markup, 
-    head    :: Markup -> Markup,
+    head    :: JPath -> Markup -> Markup,
     row     :: Markup -> Markup }
 
 renderJTable :: TableStyle -> ColumnOrdering -> [Json] -> Markup
