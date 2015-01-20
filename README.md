@@ -110,6 +110,7 @@ Assume the following JSON:
    * `.profile.comments[*].replyTo[1]` -> `Text`
    * `.profile.comments[*].time` -> `Date`
 2. Now we push all arrays to leaf nodes, producing the following structure:
+
    ```json
     {
       "userId": 8927524,
@@ -127,6 +128,7 @@ Assume the following JSON:
     }
    ```
 3. Now we split apart the JSON paths from the leaf nodes:
+
    ```json
     [
       [".userId",           8927524],
