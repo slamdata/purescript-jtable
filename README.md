@@ -14,12 +14,12 @@ Both of these libraries are listed as dependencies in [bower.json](bower.json).
 
 ```purescript
 
--- Data.Argonaut.JsonSemantic
+-- Data.Argonaut.JSemantic
 
 data JSemantic =       -- this could be moved to Data.Argonaut
     Integral    |
     Fractional  |
-    Date        |      -- ISO8601 & family
+    Date        |
     DateTime    |
     Time        |
     Interval    |
@@ -55,7 +55,9 @@ foundationStyle :: TableStyle
 
 ## Algorithm
 
-1. Classify every leaf node using `JSemantic` (leaf nodes include `null`, `String`, `Boolean`, and `Number`).
+**Note:** *The algorithm does not have to be implemented in this fashion, but the end result should be the same.*
+
+1. Classify every leaf node using `JSemantic` (leaf nodes include `null`, `String`, `Boolean`, and `Number`), based on the most common type of semantic detected in the data (this is used only for formatting).
 2. Classify every array as either a tuple or a list, according to heterogeneity.
    * Heterogeneous arrays of the same length are classified as tuples.
    * Homogeneous arrays of differing lengths are classified as lists.
@@ -68,6 +70,10 @@ foundationStyle :: TableStyle
 8. Render the content in straightforward fashion. Arrays of leaves are rendered differently depending on their type:
    * **Tuples**. Tuples are rendered as inline, divided, anonymous cells.
    * **Lists**. Lists are rendered vertically.
+
+### Worked Example
+
+Assume the following JSON:
 
 
 ```json
@@ -91,6 +97,51 @@ foundationStyle :: TableStyle
 }
 ```
 
+1. Assuming the above JSON sample, we first clasify the leaf nodes and arrays:
+   * `.userId` -> `Integral`
+   * `.profile.name` -> `Text`
+   * `.profile.age` -> `Integral`
+   * `.profile.gender` -> `Text`
+   * `.profile.comments[*]` -> Array
+   * `.profile.comments[*].id` -> `Text`
+   * `.profile.comments[*].text` -> `Text`
+   * `.profile.comments[*].replyTo[*]` -> Tuple
+   * `.profile.comments[*].replyTo[0]` -> `Integral`
+   * `.profile.comments[*].replyTo[1]` -> `Text`
+   * `.profile.comments[*].time` -> `Date`
+2. Now we push all arrays to leaf nodes, producing the following structure:
+   ```json
+    {
+      "userId": 8927524,
+      "profile": {
+        "name":   "Mary Jane",
+        "age":    29,
+        "gender": "female"
+      },
+      "comments": {
+        "id":       ["F2372BAC", "GH732AFC"],
+        "text":     ["I concur.", null],
+        "replyTo":  [[9817361, "F8ACD164F"], [9654726, "A44124F"]],
+        "time":     ["2015-02-03", "2015-03-01"]
+      }
+    }
+   ```
+3. Now we split apart the JSON paths from the leaf nodes:
+   ```json
+    [
+      [".userId",           8927524],
+      [".profile.name",     "Mary Jane"],
+      [".profile.age",      29],
+      [".profile.gender",   "female"],
+      [".comments.id":      ["F2372BAC", "GH732AFC"]],
+      [".comments.text":    ["I concur.", null]],
+      [".comments.replyTo": [[9817361, "F8ACD164F"], [9654726, "A44124F"]]],
+      [".comments.time":    ["2015-02-03", "2015-03-01"]]
+    ]
+   ```
+4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JPath`.
+5. We now render the tuples as a hierarchical table, as specified above.
+
 ```
 |----------|----------------------------|------------------------------------------------------------|
 |          |           profile          |                           comments                         |
@@ -102,6 +153,8 @@ foundationStyle :: TableStyle
 |          |           |     |          | GH732AFC |              | 9654726 | A44124F   | 2015-03-01 |
 |----------|-----------|-----|----------|------------------------------------------------------------|
 ```
+
+Note the difference in how `comments[*]` is rendered versus `replyTo[*]`, because the first one is classified as a list, while the second is classified as a tuple.
 
 ## Examples
 
