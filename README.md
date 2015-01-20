@@ -135,10 +135,10 @@ Assume the following JSON:
       [".profile.name",     "Mary Jane"],
       [".profile.age",      29],
       [".profile.gender",   "female"],
-      [".comments.id":      ["F2372BAC", "GH732AFC"]],
-      [".comments.text":    ["I concur.", null]],
-      [".comments.replyTo": [[9817361, "F8ACD164F"], [9654726, "A44124F"]]],
-      [".comments.time":    ["2015-02-03", "2015-03-01"]]
+      [".comments.id",      ["F2372BAC", "GH732AFC"]],
+      [".comments.text",    ["I concur.", null]],
+      [".comments.replyTo", [[9817361, "F8ACD164F"], [9654726, "A44124F"]]],
+      [".comments.time",    ["2015-02-03", "2015-03-01"]]
     ]
    ```
 4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JPath`.
