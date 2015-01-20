@@ -17,9 +17,11 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-argonaut":  "~0.2.10",
-    "purescript-smolder":   "~1.0.2"
+    "purescript-argonaut": "git@github.com:purescript-contrib/purescript-argonaut.git#0.3.0",
+    "purescript-smolder": "~1.0.2"
   },
-  "devDependencies": {
+  "devDependencies": {},
+  "resolutions": {
+    "purescript-maps": "~0.2.0"
   }
 }
