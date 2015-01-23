@@ -63,7 +63,7 @@ foundationStyle :: TableStyle
    * Homogeneous arrays of differing lengths are classified as lists.
    * Consider two object schemas homogeneous if one has a strict superset of the fields of the other one (i.e. ignore differences due to non-existence).
 3. Push arrays to the leaf nodes.
-4. Pull apart the JSON objects into a list of tuples consisting of a JSON path (e.g. `.profile.name`), and either a leaf node, or an array of leaf nodes.
+4. Pull apart the JSON objects into a list of tuples consisting of a JSON path (e.g. `.profile.name`), and either a leaf node, or an array of leaf nodes (`[Tuple JCursor (Either [JsonPrimitive] JsonPrimitive)]`).
 5. Determine the number of levels in the table headers by finding the deepest JSON path in the list of tuples (e.g. `.profile.name` has a depth of 2).
 6. Treat the unique set of JSON paths in the list of tuples as the (hierarchical) columns for the table.
 7. Render the columns hierarchically.
