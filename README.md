@@ -8,7 +8,7 @@ If you decide to take on this project, there is [some code you may extract from 
 
 ## API
 
-The `Json` and `JPath` data types that appear in the API are from [purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut). The `Markup` data type that appears in the API is from [purescript-smolder](https://github.com/bodil/purescript-smolder). 
+The `Json` and `JCursor` data types that appear in the API are from [purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut). The `Markup` data type that appears in the API is from [purescript-smolder](https://github.com/bodil/purescript-smolder). 
 
 Both of these libraries are listed as dependencies in [bower.json](bower.json).
 
@@ -33,13 +33,13 @@ data JSemantic =       -- this could be moved to Data.Argonaut
 
 type Level = Number
 
-data ColumnOrdering = InOrdering | CustomOrdering (JPath -> JPath -> Ordering)
+data ColumnOrdering = InOrdering | CustomOrdering (JCursor -> JCursor -> Ordering)
 
 data TableStyle = 
   TableStyle { 
     table   :: Level -> Markup -> Markup,
     cell    :: JSemantic -> Markup -> Markup, 
-    head    :: JPath -> Markup -> Markup,
+    head    :: JCursor -> Markup -> Markup,
     row     :: Markup -> Markup }
 
 renderJTable :: TableStyle -> ColumnOrdering -> [Json] -> Markup
@@ -141,7 +141,7 @@ Assume the following JSON:
       [".comments.time",    ["2015-02-03", "2015-03-01"]]
     ]
    ```
-4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JPath`.
+4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JCursor`.
 5. We now render the tuples as a hierarchical table, as specified above.
 
 ```
