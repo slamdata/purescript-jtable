@@ -35,14 +35,29 @@ type Level = Number
 
 data ColumnOrdering = InOrdering | CustomOrdering (JCursor -> JCursor -> Ordering)
 
+-- Table style does not create the structure of a table, it only styles
+-- a table that's already been created.
 data TableStyle = 
   TableStyle { 
-    table   :: Level -> Markup -> Markup,
-    cell    :: JSemantic -> Markup -> Markup, 
-    head    :: JCursor -> Markup -> Markup,
-    row     :: Markup -> Markup }
+    table   :: Level      -> -- is this a top-level table? or a nested table?
+               Markup     -> -- the unstyled <table> element
+               Markup,    -> -- the styled <table> element
 
-renderJTable :: TableStyle -> ColumnOrdering -> [Json] -> Markup
+    cell    :: JSemantic  -> -- what type of cell (for purposes of formatting only!)
+               Markup     -> -- the unstyled <td> element
+               Markup,    -> -- the styled <td> element
+
+    head    :: JCursor    -> -- the path associated with the header
+               Markup     -> -- the unstyled <th> element
+               Markup,    -> -- the styled <th> element
+
+    row     :: Markup     -> -- the unstyled <tr> element
+               Markup }      -- the styled <tr> element
+
+renderJTable :: TableStyle      -> -- the style to apply to the table
+                ColumnOrdering  -> -- how to order the columns
+                [Json]          -> -- the array of JSON values
+                Markup          -> -- the final HTML markup for the table
 
 -- Data.Json.Render.Styles
 
@@ -61,13 +76,13 @@ foundationStyle :: TableStyle
 2. Classify every array as either a tuple or a list, according to heterogeneity.
    * Heterogeneous arrays of the same length are classified as tuples.
    * Homogeneous arrays of differing lengths are classified as lists.
-   * Consider two object schemas homogeneous if one has a strict superset of the fields of the other one (i.e. ignore differences due to non-existence).
+   * When comparing object schemas, ignore differences due to nulls or non-existence. For example, `{"foo": 1}` should be considered to have the same schema as `{"foo": 1, "bar": 2}`, and `{"foo": 1, "baz": null}`.
 3. Push arrays to the leaf nodes.
 4. Pull apart the JSON objects into a list of tuples consisting of a JSON path (e.g. `.profile.name`), and either a leaf node, or an array of leaf nodes (`[Tuple JCursor (Either [JsonPrimitive] JsonPrimitive)]`).
 5. Determine the number of levels in the table headers by finding the deepest JSON path in the list of tuples (e.g. `.profile.name` has a depth of 2).
 6. Treat the unique set of JSON paths in the list of tuples as the (hierarchical) columns for the table.
 7. Render the columns hierarchically.
-8. Render the content in straightforward fashion. Arrays of leaves are rendered differently depending on their type:
+8. Render the content in straightforward fashion (do not render `null` or undefined values, leave those cells blank!). Arrays of leaves are rendered differently depending on their type:
    * **Tuples**. Tuples are rendered as inline, divided, anonymous cells.
    * **Lists**. Lists are rendered vertically.
 
@@ -97,7 +112,7 @@ Assume the following JSON:
 }
 ```
 
-1. Assuming the above JSON sample, we first clasify the leaf nodes and arrays:
+1. Assuming the above JSON sample, we first classify the leaf nodes and arrays:
    * `.userId` -> `Integral`
    * `.profile.name` -> `Text`
    * `.profile.age` -> `Integral`
@@ -127,7 +142,7 @@ Assume the following JSON:
       }
     }
    ```
-3. Now we split apart the JSON paths from the leaf nodes:
+3. Now we split apart the JSON paths from the leaf nodes (represented below by JSON, since it's easier to read):
 
    ```json
     [
@@ -141,7 +156,7 @@ Assume the following JSON:
       [".comments.time",    ["2015-02-03", "2015-03-01"]]
     ]
    ```
-4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JCursor`.
+4. We determine the depth of the table headings to be 2, because that is the maximum depth of any `JCursor` that appears in the list of tuples.
 5. We now render the tuples as a hierarchical table, as specified above.
 
 ```
@@ -157,6 +172,118 @@ Assume the following JSON:
 ```
 
 Note the difference in how `comments[*]` is rendered versus `replyTo[*]`, because the first one is classified as a list, while the second is classified as a tuple.
+
+### Other Examples
+
+Examples courtesy of @fresheyeball.
+
+```json
+[{
+   "foo"  : "foozle",
+   "bars" : [{
+       "zip" : [5, 3],
+       "zop": null
+   },{
+       "zip":null,
+       "zop":[1, 9, 2]
+   }]
+}]
+```
+
+```
+|------------|---------------------------|
+|            |            bars           |
+|------------|---------------------------|
+|    foo     |     zip     |     zop     |
+|------------|-------------|-------------|
+|   foozle   |           5 |             |
+|            |           3 |             |
+|            |-------------|-------------|
+|            |             |           1 |
+|            |             |           9 |
+|            |             |           2 |
+|------------|-------------|-------------|
+```
+
+```json
+[{
+    "foo": "foozle",
+    "bars": [{
+        "zip": 0,
+        "zop": 5
+      },{
+        "zip": 3,
+        "zop": 7
+    }]
+}]
+```
+
+```
+|----------|-----------|
+|          |    bars   |
+|----------|-----------|
+|   foo    | zip | zop |
+|----------|-----|-----|
+|  foozle  |  0  |  5  |
+|          |-----|-----|
+|          |  3  |  7  |
+|----------|-----|-----|
+```
+
+```json
+[{
+    "foo": "foozle",
+    "bars": [{
+        "zip": 0,
+        "zop": 5
+      },{
+        "zip": 3,
+        "zop": 7
+    }]
+}, 
+{
+    "foo": "chozle",
+    "bars": [{
+        "zip": 7,
+        "zop": 6
+      },{
+        "zip": 0,
+        "zop": 2
+    }]
+},
+{
+    "foo": "boggle",
+    "bars": [{
+        "zip": 3,
+        "zop": 8
+      },{
+        "zip": 3,
+        "zop": 8
+    }]
+}]
+```
+
+```
+|----------|-----------|
+|          |    bars   |
+|----------|-----------|
+|   foo    | zip | zop |
+|----------|-----|-----|
+|  foozle  |  0  |  5  |
+|          |-----|-----|
+|          |  3  |  7  |
+|----------|-----------|
+|  chozle  |  7  |  6  |
+|          |-----|-----|
+|          |  0  |  2  |
+|----------|-----------|
+|  boggle  |  3  |  8  |
+|          |-----|-----|
+|          |  3  |  8  |
+|----------|-----|-----|
+```
+
+**Note**: The schema is fully unified and the header appears only once. If objects are heterogeneous in structure, then this is reflected by many cells being blank (but the schema is still not repeated!).
 
 ## Examples
 
