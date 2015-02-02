@@ -2,7 +2,7 @@
 
 A small but powerful Purescript library to render heterogeneous arrays of JSON into HTML nodes that display multi-dimensional tables. The rendering degrades gracefully for flat data (to ordinary tables).
 
-**Note**: *SlamData is offering a $2K bounty to whoever authors the first Pull Request that we merge into this repository. This is a great way to learn some Purescript, as well as contribute to a 100% open source library released under a commercial-friendly MIT license.*
+**Note**: *SlamData is offering a $2K bounty to whoever authors the first Pull Request merged into this repository that satisfies the requirements of the project. This is a great way to learn some Purescript, as well as contribute to a 100% open source library released under a commercial-friendly MIT license.*
 
 If you decide to take on this project, there is [some code you may extract from SlamData](https://github.com/slamdata/slamdata/blob/master/src/SlamData/Data/Analyze.purs), which should be generalized and submitted to [purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut).
 
@@ -43,15 +43,15 @@ data TableStyle =
                Markup     -> -- the unstyled <table> element
                Markup,       -- the styled <table> element
 
-    cell    :: JSemantic  -> -- what type of cell (for purposes of formatting only!)
+    td      :: JSemantic  -> -- what type of cell (for purposes of formatting only!)
                Markup     -> -- the unstyled <td> element
                Markup,       -- the styled <td> element
 
-    head    :: JCursor    -> -- the path associated with the header
+    th      :: JCursor    -> -- the path associated with the header
                Markup     -> -- the unstyled <th> element
                Markup,       -- the styled <th> element
 
-    row     :: Markup     -> -- the unstyled <tr> element
+    tr      :: Markup     -> -- the unstyled <tr> element
                Markup }      -- the styled <tr> element
 
 renderJTable :: TableStyle      -> -- the style to apply to the table
