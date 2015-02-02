@@ -43,15 +43,15 @@ data TableStyle =
                Markup     -> -- the unstyled <table> element
                Markup,       -- the styled <table> element
 
-    cell    :: JSemantic  -> -- what type of cell (for purposes of formatting only!)
+    td      :: JSemantic  -> -- what type of cell (for purposes of formatting only!)
                Markup     -> -- the unstyled <td> element
                Markup,       -- the styled <td> element
 
-    head    :: JCursor    -> -- the path associated with the header
+    th      :: JCursor    -> -- the path associated with the header
                Markup     -> -- the unstyled <th> element
                Markup,       -- the styled <th> element
 
-    row     :: Markup     -> -- the unstyled <tr> element
+    tr      :: Markup     -> -- the unstyled <tr> element
                Markup }      -- the styled <tr> element
 
 renderJTable :: TableStyle      -> -- the style to apply to the table
