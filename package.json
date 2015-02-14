@@ -1,15 +1,17 @@
 {
-  "name":       "purescript-jtable",
-  "license":    "MIT",
+  "name": "purescript-jtable",
+  "version": "0.0.1",
+  "license": "MIT",
   "repository": "git@github.com:slamdata/purescript-jtable.git",
   "contributors": [
-    "John A. De Goes <john@degoes.net> (http://degoes.net)"
+    "John A. De Goes <john@degoes.net> (http://degoes.net)",
+    "Marton Boros <martonboros@gmail.com> (https://github.com/brainrape)"
   ],
   "devDependencies": {
-    "gulp":             "~3.8.10",
-    "gulp-purescript":  "~0.1.2",
-    "gulp-run":         "~1.6.6",
-    "run-sequence":     "~1.0.2",
-    "gulp-jsvalidate":  "~1.0.1"
+    "gulp": "~3.8.10",
+    "gulp-purescript": "~0.1.2",
+    "gulp-run": "~1.6.6",
+    "run-sequence": "~1.0.2",
+    "gulp-jsvalidate": "~1.0.1"
   }
 }
