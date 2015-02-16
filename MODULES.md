@@ -76,9 +76,6 @@
 
     insertHeaderCells :: Number -> Tree -> Tree
 
-
-    localeCompare :: String -> String -> Number
-
      maybe merge a tuple of objects into a table segment
 
     mergeObjTuple :: Tree -> JCursor -> [Json] -> Maybe Table

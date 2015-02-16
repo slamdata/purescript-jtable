@@ -5,13 +5,13 @@ module Data.Json.JTable.Internal
   , JPath(..), Table(..)
   , tFromJson, tMergeArray, widthOfPrimTuple, insertHeaderCells
   , cFromJson, cMergeObj, mergeObjTuple
-  , _cN, toPrim, strcmp, localeCompare, _nattr, _cspan, _rspan
+  , _cN, toPrim, strcmp, _nattr, _cspan, _rspan
   ) where
 
 import Data.Either
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Tuple
-import Data.String (joinWith)
+import Data.String (joinWith, localeCompare)
 import Data.Array
 import qualified Data.Array.Unsafe as AU
 import qualified Data.StrMap as M
@@ -193,10 +193,6 @@ sortTree :: (JPath -> JPath -> Ordering) -> Tree -> Tree
 sortTree ord (T p w h k) = T p w h ( 
   sortBy (\t1 t2 -> ord (t1 # tPath) (t2 # tPath)) (k <#> sortTree ord))
 
-
-foreign import localeCompare """var localeCompare =
-function (s1) { return function (s2) {
-  return s1.localeCompare(s2) } }""" :: String -> String -> Number
 
 strcmp :: String -> String -> Ordering
 strcmp s1 s2 = compare (localeCompare s1 s2) 0

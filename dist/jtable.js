@@ -19255,9 +19255,6 @@ PS.Data_Json_JTable_Internal = (function () {
     var Data_Tuple = PS.Data_Tuple;
     var Data_Argonaut_Parser = PS.Data_Argonaut_Parser;
     var jnull = null;;
-    var localeCompare =
-function (s1) { return function (s2) {
-  return s1.localeCompare(s2) } };
     
     /**
      *  header data
@@ -19450,7 +19447,7 @@ function (s1) { return function (s2) {
     };
     var strcmp = function (s1) {
         return function (s2) {
-            return Prelude.compare(Prelude.ordNumber)(localeCompare(s1)(s2))(0);
+            return Prelude.compare(Prelude.ordNumber)(Data_String.localeCompare(s1)(s2))(0);
         };
     };
     
@@ -19729,7 +19726,6 @@ function (s1) { return function (s2) {
         _rspan: _rspan, 
         _cspan: _cspan, 
         _nattr: _nattr, 
-        localeCompare: localeCompare, 
         strcmp: strcmp, 
         toPrim: toPrim, 
         _cN: _cN, 
