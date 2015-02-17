@@ -46,7 +46,7 @@ Into this:
 ## How?
 
 Install with bower: `$ bower install slamdata/purescript-jtable`
-Or use the compiled browser version at [dist/jtable.js](dist/jtable.js)
+Or use the compiled browser version at [examples/jtable.js](examples/jtable.js)
 
 
 ### Example Usage
@@ -62,7 +62,7 @@ renderJTable defJTableOpts {
   columnOrdering = alphaOrdering }
 
 ```
-See the [Try it!](http://rawgit.com/brainrape/purescript-jtable/dev/examples/try.html) page and [src/Data.Json.JTable.Examples.purs](src/Data.Json.JTable.Examples.purs) for more usage examples.
+See the [Try it!](http://rawgit.com/brainrape/purescript-jtable/dev/examples/try.html) page and [examples/Data.Json.JTable.Examples.purs](examples/Data.Json.JTable.Examples.purs) for more usage examples.
 
 
 ### API

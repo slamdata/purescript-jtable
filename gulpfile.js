@@ -24,7 +24,7 @@ var paths = {
             ]
         }
     },
-    exampleSrc: 'example/Main.purs',
+    exampleSrc: 'examples/Data.Json.JTable.Examples.purs',
     test: 'test/**/*.purs'
 };
 
@@ -67,8 +67,9 @@ function sequence () {
 }
 
 gulp.task('browser', function() {
-    return compile(purescript.psc, [paths.src].concat(paths.bowerSrc), {output: 'jtable.js'})
-        .pipe(gulp.dest('dist'))
+    return compile(purescript.psc, [paths.exampleSrc, paths.src].concat(paths.bowerSrc), {
+        output: 'jtable.js', main:'Data.Json.JTable.Examples'})
+        .pipe(gulp.dest('examples'))
 });
 
 gulp.task('make', function() {

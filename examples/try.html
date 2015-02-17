@@ -32,11 +32,11 @@
 
   Renderer:
   <select id="select_renderer">
-    <option value="Default">Default</option>
-    <option value="Debug">Debug</option>
-    <option value="Semantic" selected>Semantic</option>
-    <option value="AlphaColumnOrdering">Alphabetic Column Ordering</option>
-    <option value="AltHeader">Alternate Header</option>
+    <option value="0">Default</option>
+    <option value="1">Debug</option>
+    <option value="2" selected>Semantic</option>
+    <option value="3">Alphabetic Column Ordering</option>
+    <option value="4">Alternate Header</option>
   </select>
   &nbsp;
   see <a href="../src/Data.Json.JTable.Examples.purs" target="_blank">Data.Json.JTable.Examples.purs</a>
@@ -1465,48 +1465,7 @@
 </pre>
 </div>
 
-<script src="../dist/jtable.js"></script>
-<script>
-window.addEventListener("load", function () {
-  var S = function (id) { return document.getElementById(id) }
-  var Sm = PS.Text_Smolder_Renderer_String
-  var JT = PS.Data_Json_JTable
-  var JTE = PS.Data_Json_JTable_Examples
-  
-  var render = function () { try { 
-    var inp = JSON.parse(S("in").value)
-    var renderer = JTE["exampleRenderer"+S("select_renderer").value]
-    var out = Sm.render(renderer(inp))
-    S("out").innerHTML = out
-  } catch (err) { S("out").innerText = err; throw err}}
-  
-  var benchmark = function () { try {
-    var inp = JSON.parse(S("in").value)
-    var renderer = JTE["exampleRenderer"+S("select_renderer").value]
-    var markup;
-    var t1 = performance.now()
-    for (var i=0; i<100; i++) {
-      markup = renderer(inp) }
-    var t2 = performance.now()
-    var out = Sm.render(markup)
-    S("out").innerHTML = out
-    S("benchmark").innerText = (Math.floor(t2 - t1) / 100) + " ms"
-  } catch (err) { S("out").innerText = err; throw err}}
-
-  var select_example = function () {
-    S("in").value = S("example-" + S("select").value).innerHTML 
-    render() }
-  
-  S("select").addEventListener("change", select_example) 
-  S("select_renderer").addEventListener("change", render) 
-  S("but_render").addEventListener("click", render)
-  S("but_benchmark").addEventListener("click", benchmark)
-  S("in").addEventListener("keydown", function(e) {
-    if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) { render() } } )
-  
-  select_example() 
-})
-</script>
+<script src="jtable.js"></script>
 
 </body>
 </html>
