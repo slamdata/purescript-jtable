@@ -64,8 +64,8 @@ _cN = const primNull
 toPrim = (foldJson _cN primBool primNum primStr _cN _cN) :: Json -> JsonPrim
 zipWithIndex xs = zip xs (0 .. length xs - 1) 
 
-so :: forall a. Boolean -> a -> Maybe a
-so b x = if b then Just x else Nothing
+justIf :: forall a. Boolean -> a -> Maybe a
+justIf b x = if b then Just x else Nothing
 
 
 -- maybe return the width of a tuple composed of primitive values
@@ -75,18 +75,18 @@ widthOfPrimTuple path ja =
     types = ja <#> foldJson (\_->0) (\_->1) (\_->2) (\_->3) (\_->4) (\_->4)
     not_same = length (nub types) /= 1
     all_prim = all ((/=) 4) types
-    in (all_prim && (not_same || length ja == 2)) `so` length ja
+    in justIf (all_prim && (not_same || length ja == 2)) $ length ja
 
 
 -- add child to tree, unify if exists
 tMergeArray :: Tree -> Tree -> Tree
 tMergeArray (T p w h k) nt@(T np nw nh nk) =
   let i = findIndex (\n -> last np == last (n # tPath)) k in case k !! i of
-    Just t2@(T p2 w2 h2 k2) -> case foldl tMergeArray t2 nk of 
-      (T _ w2' h2' k2') -> let k' = updateAt i (T p2 w2' h2' k2') k
-                               w' = w - w2 + w2'
-                               h' = max h (h2' + 1)
-                           in T p w' h' k'
+    Just child_t@(T cp cw ch ck) -> case foldl tMergeArray child_t nk of 
+                 (T _ cw' ch' ck') -> let w' = w - cw + cw'
+                                          h' = max h (ch' + 1)
+                                          k' = updateAt i (T cp cw' ch' ck') k
+                                      in T p w' h' k'
     Nothing -> let w' = if null k then nw else w+nw
                    h' = max h $ nh + 1
                    k' = snoc k nt
@@ -118,10 +118,11 @@ cMergeObj :: [(Tuple Number Table)] -> Table
 cMergeObj rss = let
   maxh = rss <#> snd <#> length # foldl max 0
   in (0 .. maxh-1) <#> \n -> rss >>= uncurry \w rs ->
-    if length rs == 1 then if n == 0 
-                           then AU.head rs <#> \(C c w h j) -> C c w maxh j
-                           else [] `fromMaybe` (rs !! n)
-    else [C (JCursorTop) w 1 primNull] `fromMaybe` (rs !! n)
+    if length rs /= 1 
+    then [C (JCursorTop) w 1 primNull] `fromMaybe` (rs !! n)
+    else if n == 0 
+         then AU.head rs <#> \(C c w h j) -> C c w maxh j
+         else [] `fromMaybe` (rs !! n)
 
 -- maybe merge a tuple of objects into a table segment
 mergeObjTuple ::Tree -> JCursor -> [Json] -> Maybe Table
@@ -129,7 +130,7 @@ mergeObjTuple t@(T p w h k) c ja = head ja *> do
   jos <- for ja toObject
   let keyss = jos <#> M.keys
   let all_keys = concat keyss
-  so ((length all_keys) == (length $ nub all_keys)) $ 
+  justIf ((length all_keys) == (length $ nub all_keys)) $ 
     cMergeObj $ k <#> \(t'@(T p' w' _ _)) -> let 
       label = AU.last p'
       i = findIndex (elem label) keyss
@@ -148,7 +149,7 @@ cFromJson t@(T p w h k) c json = let
       return $ Tuple w' (cFromJson t' (downField label c) j)
   ma = toArray json
   obtup = ma >>= mergeObjTuple t c
-  width = ma >>= widthOfPrimTuple p >>= so (h <= 0 && w > 1)
+  width = ma >>= widthOfPrimTuple p >>= justIf (h <= 0 && w > 1)
   tuple = ma <#> \a -> singleton $ (0 .. w-1) <#> \i ->
     C (downIndex i c) 1 1 $ toPrim $ jnull `fromMaybe` (a !! i)
   array = ma <#> \a -> zipWithIndex a >>= uncurry
@@ -187,8 +188,8 @@ renderTbody tr' tdf t json =
 
 -- sort header tree by ColumnOrdering
 sortTree :: (JPath -> JPath -> Ordering) -> Tree -> Tree
-sortTree ord (T p w h k) = T p w h ( 
-  sortBy (\t1 t2 -> ord (t1 # tPath) (t2 # tPath)) (k <#> sortTree ord))
+sortTree ord (T p w h k) = T p w h $
+  sortBy (\t1 t2 -> ord (t1 # tPath) (t2 # tPath)) (k <#> sortTree ord)
 
 
 strcmp :: String -> String -> Ordering

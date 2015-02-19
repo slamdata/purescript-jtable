@@ -19387,7 +19387,28 @@ PS.Data_Json_JTable_Internal = (function () {
             })(Prelude["<#>"](Data_Array.functorArray)(_978.value3)(sortTree(_977))));
         };
     };
-    var so = function (b) {
+    var showTree = new Prelude.Show(function (_981) {
+        return Data_String.joinWith(" ")([ "(T", Prelude.show(Prelude.showArray(Prelude.showString))(_981.value0), Prelude.show(Prelude.showNumber)(_981.value1), Prelude.show(Prelude.showNumber)(_981.value2), Prelude.show(Prelude.showArray(showTree))(_981.value3), ")" ]);
+    });
+    var showCell = new Prelude.Show(function (_982) {
+        return Data_String.joinWith(" ")([ "(C", Prelude.show(Prelude.showNumber)(_982.value1), Prelude.show(Prelude.showNumber)(_982.value2), Prelude.show(Data_Argonaut_JCursor.showJCursor)(_982.value0), Prelude.show(Data_Argonaut_JCursor.showJsonPrim)(_982.value3), ")" ]);
+    });
+    
+    /**
+     *  render a grid from an array of arrays
+     */
+    var renderRows = function (tr$prime) {
+        return function (cellf) {
+            return function (rows) {
+                return Data_Foldable.mconcat(Data_Foldable.foldableArray)(Text_Smolder_Markup.monoidMarkup)(Prelude[">>="](Data_Array.bindArray)(zipWithIndex(rows))(function (_44) {
+                    return Prelude["return"](Data_Array.monadArray)(tr$prime(Data_Foldable.mconcat(Data_Foldable.foldableArray)(Text_Smolder_Markup.monoidMarkup)(Prelude[">>="](Data_Array.bindArray)(zipWithIndex(_44.value0))(function (_43) {
+                        return Prelude["return"](Data_Array.monadArray)(cellf(_44.value1)(_43.value1)(_43.value0));
+                    }))));
+                }));
+            };
+        };
+    };
+    var justIf = function (b) {
         return function (x) {
             if (b) {
                 return new Data_Maybe.Just(x);
@@ -19420,7 +19441,7 @@ PS.Data_Json_JTable_Internal = (function () {
                 }));
                 var not_same = Data_Array.length(Data_Array.nub(Prelude.eqNumber)(types)) !== 1;
                 var all_prim = Data_Foldable.all(Data_Foldable.foldableArray)(Prelude["/="](Prelude.eqNumber)(4))(types);
-                return so(all_prim && (not_same || Data_Array.length(ja) === 2))(Data_Array.length(ja));
+                return justIf(all_prim && (not_same || Data_Array.length(ja) === 2))(Data_Array.length(ja));
             })());
         };
     };
@@ -19432,11 +19453,11 @@ PS.Data_Json_JTable_Internal = (function () {
         return function (json) {
             var prim = new T(path, 1, 0, [  ]);
             var obj = Prelude["<#>"](Data_Maybe.functorMaybe)(Data_Argonaut_Core.toObject(json))(function (jo) {
-                var _3548 = Data_StrMap.isEmpty(jo);
-                if (_3548) {
+                var _3564 = Data_StrMap.isEmpty(jo);
+                if (_3564) {
                     return new T(path, 1, 0, [  ]);
                 };
-                if (!_3548) {
+                if (!_3564) {
                     var k = Prelude["<#>"](Data_Array.functorArray)(Data_StrMap.toList(jo))(Data_Tuple.uncurry(function (l) {
                         return function (j) {
                             return tFromJson(Data_Array.snoc(path)(l))(j);
@@ -19464,27 +19485,6 @@ PS.Data_Json_JTable_Internal = (function () {
                 });
             });
             return Data_Maybe.fromMaybe(prim)(Control_Alt["<|>"](Data_Maybe.altMaybe)(Control_Alt["<|>"](Data_Maybe.altMaybe)(obj)(tuple))(array));
-        };
-    };
-    var showTree = new Prelude.Show(function (_981) {
-        return Data_String.joinWith(" ")([ "(T", Prelude.show(Prelude.showArray(Prelude.showString))(_981.value0), Prelude.show(Prelude.showNumber)(_981.value1), Prelude.show(Prelude.showNumber)(_981.value2), Prelude.show(Prelude.showArray(showTree))(_981.value3), ")" ]);
-    });
-    var showCell = new Prelude.Show(function (_982) {
-        return Data_String.joinWith(" ")([ "(C", Prelude.show(Prelude.showNumber)(_982.value1), Prelude.show(Prelude.showNumber)(_982.value2), Prelude.show(Data_Argonaut_JCursor.showJCursor)(_982.value0), Prelude.show(Data_Argonaut_JCursor.showJsonPrim)(_982.value3), ")" ]);
-    });
-    
-    /**
-     *  render a grid from an array of arrays
-     */
-    var renderRows = function (tr$prime) {
-        return function (cellf) {
-            return function (rows) {
-                return Data_Foldable.mconcat(Data_Foldable.foldableArray)(Text_Smolder_Markup.monoidMarkup)(Prelude[">>="](Data_Array.bindArray)(zipWithIndex(rows))(function (_44) {
-                    return Prelude["return"](Data_Array.monadArray)(tr$prime(Data_Foldable.mconcat(Data_Foldable.foldableArray)(Text_Smolder_Markup.monoidMarkup)(Prelude[">>="](Data_Array.bindArray)(zipWithIndex(_44.value0))(function (_43) {
-                        return Prelude["return"](Data_Array.monadArray)(cellf(_44.value1)(_43.value1)(_43.value0));
-                    }))));
-                }));
-            };
         };
     };
     
@@ -19522,8 +19522,11 @@ PS.Data_Json_JTable_Internal = (function () {
         return Prelude["<#>"](Data_Array.functorArray)(Data_Array[".."](0)(maxh - 1))(function (n) {
             return Prelude[">>="](Data_Array.bindArray)(rss)(Data_Tuple.uncurry(function (w) {
                 return function (rs) {
-                    var _3578 = Data_Array.length(rs) === 1;
+                    var _3578 = Data_Array.length(rs) !== 1;
                     if (_3578) {
+                        return Data_Maybe.fromMaybe([ new C(Data_Argonaut_JCursor.JCursorTop.value, w, 1, Data_Argonaut_JCursor.primNull) ])(Data_Array["!!"](rs)(n));
+                    };
+                    if (!_3578) {
                         var _3579 = n === 0;
                         if (_3579) {
                             return Prelude["<#>"](Data_Array.functorArray)(Data_Array_Unsafe.head(rs))(function (_956) {
@@ -19534,9 +19537,6 @@ PS.Data_Json_JTable_Internal = (function () {
                             return Data_Maybe.fromMaybe([  ])(Data_Array["!!"](rs)(n));
                         };
                         throw new Error("Failed pattern match");
-                    };
-                    if (!_3578) {
-                        return Data_Maybe.fromMaybe([ new C(Data_Argonaut_JCursor.JCursorTop.value, w, 1, Data_Argonaut_JCursor.primNull) ])(Data_Array["!!"](rs)(n));
                     };
                     throw new Error("Failed pattern match");
                 };
@@ -19602,7 +19602,7 @@ PS.Data_Json_JTable_Internal = (function () {
                 return Control_Apply["*>"](Data_Maybe.applyMaybe)(Data_Array.head(_970))(Prelude[">>="](Data_Maybe.bindMaybe)(Data_Traversable["for"](Data_Maybe.applicativeMaybe)(Data_Traversable.traversableArray)(_970)(Data_Argonaut_Core.toObject))(function (_41) {
                     var keyss = Prelude["<#>"](Data_Array.functorArray)(_41)(Data_StrMap.keys);
                     var all_keys = Data_Array.concat(keyss);
-                    return so(Data_Array.length(all_keys) === Data_Array.length(Data_Array.nub(Prelude.eqString)(all_keys)))(cMergeObj(Prelude["<#>"](Data_Array.functorArray)(_968.value3)(function (_957) {
+                    return justIf(Data_Array.length(all_keys) === Data_Array.length(Data_Array.nub(Prelude.eqString)(all_keys)))(cMergeObj(Prelude["<#>"](Data_Array.functorArray)(_968.value3)(function (_957) {
                         var label = Data_Array_Unsafe.last(_957.value0);
                         var i = Data_Array.findIndex(Data_Foldable.elem(Prelude.eqString)(Data_Foldable.foldableArray)(label))(keyss);
                         var j = Data_Maybe.fromMaybe(jnull)(Prelude[">>="](Data_Maybe.bindMaybe)(Data_Array["!!"](_41)(i))(Data_StrMap.lookup(label)));
@@ -19637,7 +19637,7 @@ PS.Data_Json_JTable_Internal = (function () {
                         return C.create(Data_Argonaut_JCursor.downIndex(i)(_972))(1)(1)(toPrim(Data_Maybe.fromMaybe(jnull)(Data_Array["!!"](a)(i))));
                     }));
                 });
-                var width = Prelude[">>="](Data_Maybe.bindMaybe)(Prelude[">>="](Data_Maybe.bindMaybe)(ma)(widthOfPrimTuple(_971.value0)))(so(_971.value2 <= 0 && _971.value1 > 1));
+                var width = Prelude[">>="](Data_Maybe.bindMaybe)(Prelude[">>="](Data_Maybe.bindMaybe)(ma)(widthOfPrimTuple(_971.value0)))(justIf(_971.value2 <= 0 && _971.value1 > 1));
                 var array = Prelude["<#>"](Data_Maybe.functorMaybe)(ma)(function (a) {
                     return Prelude[">>="](Data_Array.bindArray)(zipWithIndex(a))(Data_Tuple.uncurry(function (j) {
                         return function (i) {
@@ -20309,7 +20309,7 @@ PS.Data_Json_JTable_Examples = (function () {
     var Debug_Trace = PS.Debug_Trace;
     var Data_Date = PS.Data_Date;
     
-var _main = function  (render_markup) { return function (examples) {
+function _main (render_markup) { return function (examples) {
   window.addEventListener("load", function () {
     var S = function (id) { return document.getElementById(id) }
     
