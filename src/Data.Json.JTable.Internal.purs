@@ -5,7 +5,7 @@ module Data.Json.JTable.Internal
   , JPath(..), Table(..)
   , tFromJson, tMergeArray, widthOfPrimTuple, insertHeaderCells
   , cFromJson, cMergeObj, mergeObjTuple
-  , _cN, toPrim, strcmp, _nattr, _cspan, _rspan
+  , foldJsonP, toPrim, zipWithIndex, orelse, strcmp, _nattr, _cspan, _rspan
   ) where
 
 import Math (max)
@@ -58,14 +58,17 @@ instance showCell :: Show Cell where
   show (C c w h j) = joinWith " " ["(C", show w, show h, show c, show j, ")"]
 
 
-foreign import jnull "var jnull = null;" :: Json
+foldJsonP :: forall a. (JsonPrim -> a) -> (JArray -> a) -> (JObject -> a) -> Json -> a
+foldJsonP f = 
+  foldJson (\_-> f primNull) (f <<< primBool) (f <<< primNum) (f <<< primStr)
 
-_cN = const primNull
-toPrim = (foldJson _cN primBool primNum primStr _cN _cN) :: Json -> JsonPrim
+toPrim :: Json -> Maybe JsonPrim
+toPrim = foldJsonP Just (const Nothing) (const Nothing)
+
 zipWithIndex xs = zip xs (0 .. length xs - 1) 
 
-justIf :: forall a. Boolean -> a -> Maybe a
-justIf b x = if b then Just x else Nothing
+orelse f g x = case f x of Just v -> v 
+                           _      -> g x
 
 
 -- maybe return the width of a tuple composed of primitive values
@@ -75,7 +78,7 @@ widthOfPrimTuple path ja =
     types = ja <#> foldJson (\_->0) (\_->1) (\_->2) (\_->3) (\_->4) (\_->4)
     not_same = length (nub types) /= 1
     all_prim = all ((/=) 4) types
-    in justIf (all_prim && (not_same || length ja == 2)) $ length ja
+    in guard (all_prim && (not_same || length ja == 2)) <#> \_-> length ja
 
 
 -- add child to tree, unify if exists
@@ -94,23 +97,22 @@ tMergeArray (T p w h k) nt@(T np nw nh nk) =
 
 -- produce a tree of header data from json
 tFromJson :: JPath -> Json -> Tree
-tFromJson path json = let
-  obj = toObject json <#> \jo ->
+tFromJson path = let
+  prim = \jp -> T path 1 0 []
+  tuple = \ja -> (widthOfPrimTuple path ja) <#> \n -> T path n 0 []
+  array = \ja -> let
+    ts = ja <#> tFromJson path
+    t = foldl tMergeArray (T path 0 0 []) (ts >>= tKids)
+    tw = t # tWidth
+    w = foldl max (max 1 tw) (ts <#> tWidth)
+    in T path w (t # tHeight) (t # tKids) 
+  obj = \jo ->
     if M.isEmpty jo then T path 1 0 []    
     else let k = M.toList jo <#> uncurry \l j -> tFromJson (snoc path l) j
              w = k <#> tWidth # foldl (+) 0
              h = 1 + foldl max 0 (k <#> tHeight)
          in T path w h k
-  m = (>>=) (toArray json)
-  tuple = m \a -> (widthOfPrimTuple path a) <#> \n -> T path n 0 []
-  array = m \a -> let
-    ts = a <#> tFromJson path
-    t' = foldl tMergeArray (T path 0 0 []) (ts >>= tKids)
-    w' = t' # tWidth
-    mw = ((head $ nub (ts <#> tWidth)) <#> max w') <|> (Just $ max 1 w')
-    in mw <#> \w -> T path w (t' # tHeight) (t' # tKids) 
-  prim = T path 1 0 []
-  in prim `fromMaybe` (obj <|> tuple <|> array)
+  in foldJsonP prim (tuple `orelse` array) obj
 
 
 -- merge table segments for each key of an object into one
@@ -130,32 +132,30 @@ mergeObjTuple t@(T p w h k) c ja = head ja *> do
   jos <- for ja toObject
   let keyss = jos <#> M.keys
   let all_keys = concat keyss
-  justIf ((length all_keys) == (length $ nub all_keys)) $ 
+  guard ((length all_keys) == (length $ nub all_keys)) <#> \_->
     cMergeObj $ k <#> \(t'@(T p' w' _ _)) -> let 
       label = AU.last p'
       i = findIndex (elem label) keyss
-      j = jnull `fromMaybe` (jos !! i >>= M.lookup label)
+      j = (primToJson primNull) `fromMaybe` (jos !! i >>= M.lookup label)
       in Tuple w' (cFromJson t' (downField label $ downIndex i c) j)
 
 -- produce data table from json, according to header tree
 cFromJson :: Tree -> JCursor -> Json -> Table
-cFromJson t@(T p w h k) c json = let
-  obj = toObject json <#> \jo ->
-    if M.isEmpty jo then [[C c w 1 primNull]] 
-    else cMergeObj $ do
-      t'@(T p' w' _ _) <- k
-      let label = AU.last p'
-      let j = jnull `fromMaybe` M.lookup label jo
-      return $ Tuple w' (cFromJson t' (downField label c) j)
-  ma = toArray json
-  obtup = ma >>= mergeObjTuple t c
-  width = ma >>= widthOfPrimTuple p >>= justIf (h <= 0 && w > 1)
-  tuple = ma <#> \a -> singleton $ (0 .. w-1) <#> \i ->
-    C (downIndex i c) 1 1 $ toPrim $ jnull `fromMaybe` (a !! i)
-  array = ma <#> \a -> zipWithIndex a >>= uncurry
-                  \j i -> cFromJson t (downIndex i c) j
-  prim = [[C c w 1 $ toPrim json]]
-  in prim `fromMaybe` (obj <|> obtup <|> (width *> tuple) <|> array)
+cFromJson t@(T p w h k) c = let
+  prim = \jp -> [[C c w 1 jp]]
+  width = if h <= 0 && w > 1 then widthOfPrimTuple p else const Nothing
+  primtup = \ja -> width ja >>= \_-> (singleton <$> for (0 .. w-1) \i -> 
+                     C (downIndex i c) 1 1 <$> (ja !! i >>= toPrim))
+  objtup = mergeObjTuple t c
+  tuple = \ja -> case primtup ja of Nothing -> objtup ja
+                                    m       -> m
+  array = \ja -> zipWithIndex ja >>= uncurry \j i -> cFromJson t (downIndex i c) j
+  obj = \jo -> if M.isEmpty jo then [[C c w 1 primNull]] 
+               else cMergeObj $ k <#> \(t'@(T p' w' _ _)) -> let
+                  label = AU.last p'
+                  j = (primToJson primNull) `fromMaybe` M.lookup label jo
+                  in Tuple w' (cFromJson t' (downField label c) j)
+  in foldJsonP prim (tuple `orelse` array) obj
 
 
 -- render a grid from an array of arrays

@@ -72,6 +72,9 @@
 
     cMergeObj :: [Tuple Number Table] -> Table
 
+
+    foldJsonP :: forall a. (JsonPrim -> a) -> (JArray -> a) -> (JObject -> a) -> Json -> a
+
      pad tall header cells from above
 
     insertHeaderCells :: Number -> Tree -> Tree
@@ -104,6 +107,9 @@
      add child to tree, unify if exists
 
     tMergeArray :: Tree -> Tree -> Tree
+
+
+    toPrim :: Json -> Maybe JsonPrim
 
      produce header rows from header tree
 
