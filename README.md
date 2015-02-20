@@ -79,7 +79,7 @@ type JTableOpts = {                 -- rendering options
   insertHeaderCells :: Boolean,     -- pad tall headers with empty cells above
   maxHomoTupSize :: Number}         -- maximum size of homogeneous tuples
 
-defJTableOpts :: JTableOpts  -- default options for easy overriding
+jTableOptsDefault :: JTableOpts  -- default options for easy overriding
 
 type JPath = [String]        -- object key hierarchy with array indices omitted
 
