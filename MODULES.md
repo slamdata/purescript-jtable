@@ -8,7 +8,7 @@
     type ColumnOrdering = JPath -> JPath -> Ordering
 
 
-    type JTableOpts = { insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
+    type JTableOpts = { maxHomoTupSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
 
      type JPath = [String]
 
@@ -66,7 +66,7 @@
 
      produce data table from json, according to header tree
 
-    cFromJson :: Tree -> JCursor -> Json -> Table
+    cFromJson :: Number -> Tree -> JCursor -> Json -> Table
 
      merge table segments for each key of an object into one
 
@@ -81,14 +81,14 @@
 
      maybe merge a tuple of objects into a table segment
 
-    mergeObjTuple :: Tree -> JCursor -> [Json] -> Maybe Table
+    mergeObjTuple :: Number -> Tree -> JCursor -> [Json] -> Maybe Table
 
      render a grid from an array of arrays
 
     renderRows :: forall a. (Markup -> Markup) -> (Number -> Number -> a -> Markup) -> [[a]] -> Markup
 
 
-    renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Json -> Markup
+    renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Table -> Markup
 
 
     renderThead :: (Markup -> Markup) -> (Tree -> Markup) -> Tree -> Markup
@@ -102,7 +102,7 @@
 
      produce a tree of header data from json
 
-    tFromJson :: JPath -> Json -> Tree
+    tFromJson :: Number -> JPath -> Json -> Tree
 
      add child to tree, unify if exists
 
@@ -117,7 +117,7 @@
 
      maybe return the width of a tuple composed of primitive values
 
-    widthOfPrimTuple :: JPath -> [Json] -> Maybe Number
+    widthOfPrimTuple :: Number -> JPath -> [Json] -> Maybe Number
 
 
 ## Module Data.Json.JSemantic

@@ -51,6 +51,9 @@ exAlphaColumnOrd =
 exAltHeader = 
   renderJTable defJTableOpts {insertHeaderCells = true}
 
+exHomoTupSize = 
+  renderJTable defJTableOpts {maxHomoTupSize = 5}
+
 
 foreign import _main """
 function _main (render_markup) { return function (examples) {
@@ -95,4 +98,10 @@ function _main (render_markup) { return function (examples) {
 
 import Debug.Trace
 main = do
-  _main render [exDefault, exDebug, exSemantic, exAlphaColumnOrd, exAltHeader]
+  _main render [ exDefault
+               , exDebug
+               , exSemantic
+               , exAlphaColumnOrd
+               , exAltHeader
+               , exHomoTupSize 
+               ]

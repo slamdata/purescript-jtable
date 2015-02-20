@@ -76,7 +76,8 @@ renderJTableDef   ::                Json  -> Markup    -- use default options
 type JTableOpts = {                 -- rendering options
   style :: TableStyle,              -- override element rendering
   columnOrdering :: ColumnOrdering, -- customize header ordering
-  insertHeaderCells :: Boolean }    -- pad tall headers with empty cells above
+  insertHeaderCells :: Boolean,     -- pad tall headers with empty cells above
+  maxHomoTupSize :: Number}         -- maximum size of homogeneous tuples
 
 defJTableOpts :: JTableOpts  -- default options for easy overriding
 

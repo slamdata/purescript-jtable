@@ -30,11 +30,15 @@ foreign import jObjArr2Tup2 "var jObjArr2Tup2 = {a:[[1, 'two'], [3, 'four']]}" :
 foreign import jTup2Obj "var jTup2Obj = [{x:1}, {y:2}]" :: [Json]
 foreign import jObjTup2Obj "var jObjTup2Obj = {a:[{x:1}, {y:2}]}" :: Json
 foreign import jObj2EArr "var jObj2EArr = {a:[], b:'one'}" :: Json
-foreign import jObjWeird "var jObjWeird = {a:{x:[1,2,3], y:[]}, b:[1,2,3,4]}" :: Json
+foreign import jObjWeird "var jObjWeird = {a:{x:[1,2,3,4], y:[]}, b:[1,2,3,4,5]}" :: Json
+foreign import jArrObj2Tups "var jArrObj2Tups = [{a:[3,2,1],b:[1,2]},{a:null,b:[3,2,1]}]" :: Json
+
+import Data.Traversable (for)
+import Data.Maybe
 
 main = do
   test "widthOfPrimTuple" do
-    let tf s t j r = assert s $ widthOfPrimTuple t j == r
+    let tf s t j r = assert s $ widthOfPrimTuple 2 t j == r
     tf "top null" [] [jNull] Nothing
     tf "top jATup2" [] jATup2 Nothing
     tf "top jATup3" [] jATup3 Nothing
@@ -87,7 +91,10 @@ main = do
     tf "jObj2EArr" jObj2EArr $ 
       "<table><thead><tr><th>a</th><th>b</th></tr></thead>" ++ 
       "<tbody><tr><td>&nbsp;</td><td>one</td></tr></tbody></table>"
-    tf "jObjWeird" jObjWeird $ "<table><thead><tr><th colspan=\"2\">a</th><th rowspan=\"2\">b</th></tr><tr><th>x</th><th>y</th></tr></thead><tbody><tr><td>1</td><td>&nbsp;</td><td>1</td></tr><tr><td>2</td><td>&nbsp;</td><td>2</td></tr><tr><td>3</td><td>&nbsp;</td><td>3</td></tr><tr><td colspan=\"2\">&nbsp;</td><td>4</td></tr></tbody></table>"
+    tf "jObjWeird" jObjWeird $ "<table><thead><tr><th colspan=\"2\">a</th><th rowspan=\"2\">b</th></tr><tr><th>x</th><th>y</th></tr></thead><tbody><tr><td>1</td><td>&nbsp;</td><td>1</td></tr><tr><td>2</td><td>&nbsp;</td><td>2</td></tr><tr><td>3</td><td>&nbsp;</td><td>3</td></tr><tr><td>4</td><td>&nbsp;</td><td>4</td></tr><tr><td colspan=\"2\">&nbsp;</td><td>5</td></tr></tbody></table>"
+    tf "jArrObj2Tups" jArrObj2Tups $ 
+      "<table><thead><tr><th colspan=\"3\">a</th><th colspan=\"3\">b</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>1</td><td>1</td><td>2</td><td>&nbsp;</td></tr><tr><td colspan=\"3\">&nbsp;</td><td>3</td><td>2</td><td>1</td></tr></tbody></table>"
+
   test "insertHeaderCells" do
     let o = defJTableOpts {insertHeaderCells = true}
     let tf s j r = assert s $ (Sm.render $ renderJTable o j) == r

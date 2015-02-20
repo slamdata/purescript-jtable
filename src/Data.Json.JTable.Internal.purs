@@ -72,13 +72,14 @@ orelse f g x = case f x of Just v -> v
 
 
 -- maybe return the width of a tuple composed of primitive values
-widthOfPrimTuple :: JPath -> [Json] -> Maybe Number
-widthOfPrimTuple path ja = 
+widthOfPrimTuple :: Number -> JPath -> [Json] -> Maybe Number
+widthOfPrimTuple hS path ja =
   path !! 0 *> ja !! 1 *> let
     types = ja <#> foldJson (\_->0) (\_->1) (\_->2) (\_->3) (\_->4) (\_->4)
     not_same = length (nub types) /= 1
     all_prim = all ((/=) 4) types
-    in guard (all_prim && (not_same || length ja == 2)) <#> \_-> length ja
+    homoTup = length ja <= max 1 hS
+    in guard (all_prim && (not_same || homoTup)) <#> \_-> length ja
 
 
 -- add child to tree, unify if exists
@@ -86,9 +87,10 @@ tMergeArray :: Tree -> Tree -> Tree
 tMergeArray (T p w h k) nt@(T np nw nh nk) =
   let i = findIndex (\n -> last np == last (n # tPath)) k in case k !! i of
     Just child_t@(T cp cw ch ck) -> case foldl tMergeArray child_t nk of 
-                 (T _ cw' ch' ck') -> let w' = w - cw + cw'
+                 (T _ cw' ch' ck') -> let cw'' = max cw' nw
+                                          w' = w - cw + cw''
                                           h' = max h (ch' + 1)
-                                          k' = updateAt i (T cp cw' ch' ck') k
+                                          k' = updateAt i (T cp cw'' ch' ck') k
                                       in T p w' h' k'
     Nothing -> let w' = if null k then nw else w+nw
                    h' = max h $ nh + 1
@@ -96,19 +98,21 @@ tMergeArray (T p w h k) nt@(T np nw nh nk) =
                in T p w' h' k'
 
 -- produce a tree of header data from json
-tFromJson :: JPath -> Json -> Tree
-tFromJson path = let
+tFromJson :: Number -> JPath -> Json -> Tree
+tFromJson hS path = let
   prim = \jp -> T path 1 0 []
-  tuple = \ja -> (widthOfPrimTuple path ja) <#> \n -> T path n 0 []
+  tuple = \ja -> widthOfPrimTuple hS path ja <#> \n -> T path n 0 []
   array = \ja -> let
-    ts = ja <#> tFromJson path
-    t = foldl tMergeArray (T path 0 0 []) (ts >>= tKids)
-    tw = t # tWidth
-    w = foldl max (max 1 tw) (ts <#> tWidth)
+    ts = ja <#> tFromJson hS path
+    ks = ts >>= tKids
+    t = foldl tMergeArray (T path 0 0 []) ks
+    tsw = case (nub $ ts <#> tWidth) of (tsw:[]) -> tsw
+                                        _ -> 1
+    w = max tsw (t # tWidth)
     in T path w (t # tHeight) (t # tKids) 
   obj = \jo ->
     if M.isEmpty jo then T path 1 0 []    
-    else let k = M.toList jo <#> uncurry \l j -> tFromJson (snoc path l) j
+    else let k = M.toList jo <#> uncurry \l j -> tFromJson hS (snoc path l) j
              w = k <#> tWidth # foldl (+) 0
              h = 1 + foldl max 0 (k <#> tHeight)
          in T path w h k
@@ -119,16 +123,15 @@ tFromJson path = let
 cMergeObj :: [(Tuple Number Table)] -> Table
 cMergeObj rss = let
   maxh = rss <#> snd <#> length # foldl max 0
-  in (0 .. maxh-1) <#> \n -> rss >>= uncurry \w rs ->
-    if length rs /= 1 
-    then [C (JCursorTop) w 1 primNull] `fromMaybe` (rs !! n)
-    else if n == 0 
-         then AU.head rs <#> \(C c w h j) -> C c w maxh j
-         else [] `fromMaybe` (rs !! n)
+  in (0 .. maxh-1) <#> \n -> rss >>= uncurry \w rs -> let
+    rnOr = flip fromMaybe (rs !! n)
+    in case rs of (r : []) -> if n == 0 then r <#> \(C c w h j) -> C c w maxh j
+                                        else rnOr [] 
+                  _        -> rnOr [C (JCursorTop) w 1 primNull]
 
 -- maybe merge a tuple of objects into a table segment
-mergeObjTuple ::Tree -> JCursor -> [Json] -> Maybe Table
-mergeObjTuple t@(T p w h k) c ja = head ja *> do
+mergeObjTuple ::Number -> Tree -> JCursor -> [Json] -> Maybe Table
+mergeObjTuple hS t@(T p w h k) c ja = head ja *> do
   jos <- for ja toObject
   let keyss = jos <#> M.keys
   let all_keys = concat keyss
@@ -137,24 +140,25 @@ mergeObjTuple t@(T p w h k) c ja = head ja *> do
       label = AU.last p'
       i = findIndex (elem label) keyss
       j = (primToJson primNull) `fromMaybe` (jos !! i >>= M.lookup label)
-      in Tuple w' (cFromJson t' (downField label $ downIndex i c) j)
+      in Tuple w' (cFromJson hS t' (downField label $ downIndex i c) j)
 
 -- produce data table from json, according to header tree
-cFromJson :: Tree -> JCursor -> Json -> Table
-cFromJson t@(T p w h k) c = let
+cFromJson :: Number -> Tree -> JCursor -> Json -> Table
+cFromJson hS t@(T p w h k) c = let
   prim = \jp -> [[C c w 1 jp]]
-  width = if h <= 0 && w > 1 then widthOfPrimTuple p else const Nothing
-  primtup = \ja -> width ja >>= \_-> (singleton <$> for (0 .. w-1) \i -> 
-                     C (downIndex i c) 1 1 <$> (ja !! i >>= toPrim))
-  objtup = mergeObjTuple t c
+  width = if h <= 0 && w > 1 then widthOfPrimTuple hS p else const Nothing
+  primtup = \ja -> width ja <#> \_-> singleton $ (0 .. w-1) <#> \i -> 
+    C (downIndex i c) 1 1 $ primNull `fromMaybe` (ja !! i >>= toPrim)
+  objtup = mergeObjTuple hS t c
   tuple = \ja -> case primtup ja of Nothing -> objtup ja
                                     m       -> m
-  array = \ja -> zipWithIndex ja >>= uncurry \j i -> cFromJson t (downIndex i c) j
+  array = \ja -> zipWithIndex ja >>= uncurry \j i -> 
+                   cFromJson hS t (downIndex i c) j
   obj = \jo -> if M.isEmpty jo then [[C c w 1 primNull]] 
                else cMergeObj $ k <#> \(t'@(T p' w' _ _)) -> let
                   label = AU.last p'
                   j = (primToJson primNull) `fromMaybe` M.lookup label jo
-                  in Tuple w' (cFromJson t' (downField label c) j)
+                  in Tuple w' (cFromJson hS t' (downField label c) j)
   in foldJsonP prim (tuple `orelse` array) obj
 
 
@@ -181,10 +185,10 @@ renderThead tr' thf (T p w h k) =
       tdf' y x t@(T p w h k) = thf t # _cspan w >>> (_rspan $ rs y k)
   in renderRows tr' tdf' $ tsToRows k
 
-renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Json -> Markup
-renderTbody tr' tdf t json =
+renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Table -> Markup
+renderTbody tr' tdf t table =
   let tdf' y x cell@(C c w h j) = tdf cell # _cspan w >>> _rspan h
-  in renderRows tr' tdf' $ cFromJson t JCursorTop json
+  in renderRows tr' tdf' table
 
 -- sort header tree by ColumnOrdering
 sortTree :: (JPath -> JPath -> Ordering) -> Tree -> Tree
@@ -199,17 +203,16 @@ strcmp s1 s2 = compare (localeCompare s1 s2) 0
 -- pad tall header cells from above
 insertHeaderCells :: Number -> Tree -> Tree
 insertHeaderCells maxh t@(T p w h k) = 
-  if null k 
-  then if maxh > 0 then T [] w 1 [insertHeaderCells (maxh-1) t]
-                   else T p w 1 k
-  else T p w h (k <#> insertHeaderCells (maxh - 1))
-
+  if null k then if maxh > 0 then T [] w 1 [insertHeaderCells (maxh - 1) t]
+                             else T p w 1 k
+            else T p w h (k <#> insertHeaderCells (maxh - 1))
 
 -- renderJTableRaw :: {...} -> Json
 renderJTableRaw o json = 
   o.style.table $ do 
-    let t  = sortTree o.columnOrdering $ tFromJson [] json
+    let t  = sortTree o.columnOrdering $ tFromJson o.maxHomoTupSize [] json
     let t' = if o.insertHeaderCells then insertHeaderCells (t # tHeight) t 
                                     else t
+    let table = cFromJson o.maxHomoTupSize t JCursorTop json
     thead $ renderThead o.style.tr o.style.th t'
-    tbody $ renderTbody o.style.tr o.style.td t json
+    tbody $ renderTbody o.style.tr o.style.td t table

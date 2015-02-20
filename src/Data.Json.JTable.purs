@@ -53,12 +53,14 @@ alphaOrdering = (\p1 p2 -> strcmp (AU.last p1) (AU.last p2)) :: ColumnOrdering
 type JTableOpts = {
   style :: TableStyle,
   columnOrdering :: ColumnOrdering,
-  insertHeaderCells :: Boolean }
+  insertHeaderCells :: Boolean,
+  maxHomoTupSize :: Number }
 
 defJTableOpts  = {
   style: noStyle,
   columnOrdering: inOrdering,
-  insertHeaderCells: false
+  insertHeaderCells: false,
+  maxHomoTupSize: 3
 } :: JTableOpts
 
 
