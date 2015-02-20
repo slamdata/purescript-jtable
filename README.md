@@ -69,9 +69,8 @@ See the [Try it!](http://rawgit.com/brainrape/purescript-jtable/dev/examples/try
 
 ```purescript
 -- rendering functions
-renderJTable      :: JTableOpts ->  Json  -> Markup    -- main renderer
-renderJTableArray :: JTableOpts -> [Json] -> Markup    -- same for arrays
-renderJTableDef   ::                Json  -> Markup    -- use default options
+renderJTable      :: JTableOpts -> Json -> Markup    -- main renderer
+renderJTableDef   ::               Json -> Markup    -- use default options
 
 type JTableOpts = {                 -- rendering options
   style :: TableStyle,              -- override element rendering
