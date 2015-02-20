@@ -16,10 +16,10 @@ import Control.Monad.Eff
 
 exDefault = renderJTableDef
 
-exDebug = renderJTable defJTableOpts {style = debugStyle}
+exDebug = renderJTable jTableOptsDefault {style = debugStyle}
 
 -- we use style instead of class to keep it self-contained
-exSemantic = renderJTable defJTableOpts {
+exSemantic = renderJTable jTableOptsDefault {
     style = noStyle { td = \c j -> case toSemantic j of
       Integral   n -> td ! style "text-align:right" $ text $ show n
       Fractional n -> td ! style "text-align:right" $ do
@@ -46,13 +46,13 @@ exSemantic = renderJTable defJTableOpts {
 
 
 exAlphaColumnOrd = 
-  renderJTable defJTableOpts {columnOrdering = alphaOrdering}
+  renderJTable jTableOptsDefault {columnOrdering = alphaOrdering}
 
 exAltHeader = 
-  renderJTable defJTableOpts {insertHeaderCells = true}
+  renderJTable jTableOptsDefault {insertHeaderCells = true}
 
 exHomoTupSize = 
-  renderJTable defJTableOpts {maxHomoTupSize = 5}
+  renderJTable jTableOptsDefault {maxHomoTupSize = 5}
 
 
 foreign import _main """

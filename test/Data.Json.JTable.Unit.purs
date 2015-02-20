@@ -96,7 +96,7 @@ main = do
       "<table><thead><tr><th colspan=\"3\">a</th><th colspan=\"3\">b</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>1</td><td>1</td><td>2</td><td>&nbsp;</td></tr><tr><td colspan=\"3\">&nbsp;</td><td>3</td><td>2</td><td>1</td></tr></tbody></table>"
 
   test "insertHeaderCells" do
-    let o = defJTableOpts {insertHeaderCells = true}
+    let o = jTableOptsDefault {insertHeaderCells = true}
     let tf s j r = assert s $ (Sm.render $ renderJTable o j) == r
     tf "jObj2Obj2" jObj2Obj2 $ 
       "<table><thead><tr><th></th><th colspan=\"2\">b</th></tr>" ++ 

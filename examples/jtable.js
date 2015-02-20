@@ -20170,13 +20170,13 @@ PS.Data_Json_JTable = (function () {
             return Prelude.EQ.value;
         };
     };
-    var defJTableOpts = {
+    var jTableOptsDefault = {
         style: noStyle, 
         columnOrdering: inOrdering, 
         insertHeaderCells: false, 
         maxHomoTupSize: 3
     };
-    var renderJTableDef = renderJTable(defJTableOpts);
+    var renderJTableDef = renderJTable(jTableOptsDefault);
     var debugStyle = (function () {
         var _3664 = {};
         for (var _3665 in noStyle) {
@@ -20217,7 +20217,7 @@ PS.Data_Json_JTable = (function () {
         noStyle: noStyle, 
         alphaOrdering: alphaOrdering, 
         inOrdering: inOrdering, 
-        defJTableOpts: defJTableOpts, 
+        jTableOptsDefault: jTableOptsDefault, 
         renderJTableDef: renderJTableDef, 
         renderJTableArray: renderJTableArray, 
         renderJTable: renderJTable
@@ -20398,9 +20398,9 @@ function _main (render_markup) { return function (examples) {
      */
     var exSemantic = Data_Json_JTable.renderJTable((function () {
         var _3709 = {};
-        for (var _3710 in Data_Json_JTable.defJTableOpts) {
-            if (Data_Json_JTable.defJTableOpts.hasOwnProperty(_3710)) {
-                _3709[_3710] = Data_Json_JTable.defJTableOpts[_3710];
+        for (var _3710 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_3710)) {
+                _3709[_3710] = Data_Json_JTable.jTableOptsDefault[_3710];
             };
         };
         _3709.style = (function () {
@@ -20485,9 +20485,9 @@ function _main (render_markup) { return function (examples) {
     })());
     var exHomoTupSize = Data_Json_JTable.renderJTable((function () {
         var _3711 = {};
-        for (var _3712 in Data_Json_JTable.defJTableOpts) {
-            if (Data_Json_JTable.defJTableOpts.hasOwnProperty(_3712)) {
-                _3711[_3712] = Data_Json_JTable.defJTableOpts[_3712];
+        for (var _3712 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_3712)) {
+                _3711[_3712] = Data_Json_JTable.jTableOptsDefault[_3712];
             };
         };
         _3711.maxHomoTupSize = 5;
@@ -20496,9 +20496,9 @@ function _main (render_markup) { return function (examples) {
     var exDefault = Data_Json_JTable.renderJTableDef;
     var exDebug = Data_Json_JTable.renderJTable((function () {
         var _3713 = {};
-        for (var _3714 in Data_Json_JTable.defJTableOpts) {
-            if (Data_Json_JTable.defJTableOpts.hasOwnProperty(_3714)) {
-                _3713[_3714] = Data_Json_JTable.defJTableOpts[_3714];
+        for (var _3714 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_3714)) {
+                _3713[_3714] = Data_Json_JTable.jTableOptsDefault[_3714];
             };
         };
         _3713.style = Data_Json_JTable.debugStyle;
@@ -20506,9 +20506,9 @@ function _main (render_markup) { return function (examples) {
     })());
     var exAltHeader = Data_Json_JTable.renderJTable((function () {
         var _3715 = {};
-        for (var _3716 in Data_Json_JTable.defJTableOpts) {
-            if (Data_Json_JTable.defJTableOpts.hasOwnProperty(_3716)) {
-                _3715[_3716] = Data_Json_JTable.defJTableOpts[_3716];
+        for (var _3716 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_3716)) {
+                _3715[_3716] = Data_Json_JTable.jTableOptsDefault[_3716];
             };
         };
         _3715.insertHeaderCells = true;
@@ -20516,9 +20516,9 @@ function _main (render_markup) { return function (examples) {
     })());
     var exAlphaColumnOrd = Data_Json_JTable.renderJTable((function () {
         var _3717 = {};
-        for (var _3718 in Data_Json_JTable.defJTableOpts) {
-            if (Data_Json_JTable.defJTableOpts.hasOwnProperty(_3718)) {
-                _3717[_3718] = Data_Json_JTable.defJTableOpts[_3718];
+        for (var _3718 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_3718)) {
+                _3717[_3718] = Data_Json_JTable.jTableOptsDefault[_3718];
             };
         };
         _3717.columnOrdering = Data_Json_JTable.alphaOrdering;

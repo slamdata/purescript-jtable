@@ -1,6 +1,6 @@
 module Data.Json.JTable
   ( renderJTable, renderJTableArray, renderJTableDef
-  , JTableOpts(..), defJTableOpts
+  , JTableOpts(..), jTableOptsDefault
   , ColumnOrdering(..), inOrdering, alphaOrdering
   , TableStyle(..), noStyle, bootstrapStyle, debugStyle
   ) where
@@ -56,7 +56,7 @@ type JTableOpts = {
   insertHeaderCells :: Boolean,
   maxHomoTupSize :: Number }
 
-defJTableOpts  = {
+jTableOptsDefault  = {
   style: noStyle,
   columnOrdering: inOrdering,
   insertHeaderCells: false,
@@ -73,4 +73,4 @@ renderJTableArray :: JTableOpts -> [Json] -> Markup
 renderJTableArray opt ja = renderJTable opt $ fromArray ja
 
 renderJTableDef :: Json -> Markup
-renderJTableDef = renderJTable defJTableOpts
+renderJTableDef = renderJTable jTableOptsDefault
