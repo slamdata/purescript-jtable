@@ -1,5 +1,5 @@
 module Data.Json.JTable
-  ( renderJTable, renderJTableArray, renderJTableDef
+  ( renderJTable, renderJTableDef
   , JTableOpts(..), jTableOptsDefault
   , ColumnOrdering(..), inOrdering, alphaOrdering
   , TableStyle(..), noStyle, bootstrapStyle, debugStyle
@@ -68,9 +68,6 @@ renderJTable :: JTableOpts -> Json -> Markup
 renderJTable o = renderJTableRaw o { style = o.style {
   th = (\t -> o.style.th (t # tPath)),
   td = (\c -> o.style.td (c # cCursor) (c # cJsonPrim)) }}
-
-renderJTableArray :: JTableOpts -> [Json] -> Markup
-renderJTableArray opt ja = renderJTable opt $ fromArray ja
 
 renderJTableDef :: Json -> Markup
 renderJTableDef = renderJTable jTableOptsDefault

@@ -21,9 +21,6 @@
     renderJTable :: JTableOpts -> Json -> Markup
 
 
-    renderJTableArray :: JTableOpts -> [Json] -> Markup
-
-
     renderJTableDef :: Json -> Markup
 
 

@@ -20148,11 +20148,6 @@ PS.Data_Json_JTable = (function () {
             return _3662;
         })());
     };
-    var renderJTableArray = function (opt) {
-        return function (ja) {
-            return renderJTable(opt)(Data_Argonaut_Core.fromArray(ja));
-        };
-    };
     var noStyle = {
         table: Text_Smolder_HTML.table, 
         tr: Text_Smolder_HTML.tr, 
@@ -20219,7 +20214,6 @@ PS.Data_Json_JTable = (function () {
         inOrdering: inOrdering, 
         jTableOptsDefault: jTableOptsDefault, 
         renderJTableDef: renderJTableDef, 
-        renderJTableArray: renderJTableArray, 
         renderJTable: renderJTable
     };
 })();
