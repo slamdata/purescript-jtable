@@ -3,6 +3,7 @@ module Test.Data.Json.JTable.Unit where
 import Test.Unit
 import Data.Maybe
 import Data.Argonaut.Core
+import Data.Argonaut.JCursor (primToJson, primNull)
 import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, span, small)
 import Text.Smolder.Markup ((!), text)
 import qualified Text.Smolder.Renderer.String (render) as Sm
@@ -13,7 +14,7 @@ import Data.Json.JTable.Internal
 import Data.Json.JTable
 
 
-foreign import jNull "var jNull = null" :: Json
+jNull = primToJson primNull
 foreign import j0 "var j0 = 0" :: Json
 foreign import jTup2  "var jTup2 = ['hi', 1]" :: Json
 foreign import jATup2 "var jATup2 = jTup2" :: [Json]
