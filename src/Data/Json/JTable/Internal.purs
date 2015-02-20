@@ -65,7 +65,7 @@ foldJsonP f =
 toPrim :: Json -> Maybe JsonPrim
 toPrim = foldJsonP Just (const Nothing) (const Nothing)
 
-zipWithIndex xs = zip xs (0 .. length xs - 1) 
+zipWithIndex xs = zip xs (0 .. ((length xs) - 1))
 
 orelse f g x = case f x of Just v -> v 
                            _      -> g x
@@ -123,7 +123,7 @@ tFromJson hS path = let
 cMergeObj :: [(Tuple Number Table)] -> Table
 cMergeObj rss = let
   maxh = rss <#> snd <#> length # foldl max 0
-  in (0 .. maxh-1) <#> \n -> rss >>= uncurry \w rs -> let
+  in (0 .. (maxh - 1)) <#> \n -> rss >>= uncurry \w rs -> let
     rnOr = flip fromMaybe (rs !! n)
     in case rs of (r : []) -> if n == 0 then r <#> \(C c w h j) -> C c w maxh j
                                         else rnOr [] 
@@ -147,7 +147,7 @@ cFromJson :: Number -> Tree -> JCursor -> Json -> Table
 cFromJson hS t@(T p w h k) c = let
   prim = \jp -> [[C c w 1 jp]]
   width = if h <= 0 && w > 1 then widthOfPrimTuple hS p else const Nothing
-  primtup = \ja -> width ja <#> \_-> singleton $ (0 .. w-1) <#> \i -> 
+  primtup = \ja -> width ja <#> \_-> singleton $ (0 .. (w - 1)) <#> \i -> 
     C (downIndex i c) 1 1 $ primNull `fromMaybe` (ja !! i >>= toPrim)
   objtup = mergeObjTuple hS t c
   tuple = \ja -> case primtup ja of Nothing -> objtup ja
