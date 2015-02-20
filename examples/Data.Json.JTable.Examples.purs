@@ -20,7 +20,7 @@ exDebug = renderJTable jTableOptsDefault {style = debugStyle}
 
 -- we use style instead of class to keep it self-contained
 exSemantic = renderJTable jTableOptsDefault {
-    style = noStyle { td = \c j -> case toSemantic j of
+    style = noStyle { td = \c j -> case toSemanticDef j of
       Integral   n -> td ! style "text-align:right" $ text $ show n
       Fractional n -> td ! style "text-align:right" $ do
         let s = split "." (show n)

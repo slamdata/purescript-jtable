@@ -136,6 +136,9 @@
       NA :: JSemantic
 
 
+    type JSemanticOpts = { regexps :: { date :: Regex, currency :: Regex, percent :: Regex } }
+
+
 ### Type Class Instances
 
 
@@ -149,7 +152,10 @@
 
      TODO: date, time
 
-    toSemantic :: JsonPrim -> JSemantic
+    toSemantic :: JSemanticOpts -> JsonPrim -> JSemantic
+
+
+    toSemanticDef :: JsonPrim -> JSemantic
 
 
 

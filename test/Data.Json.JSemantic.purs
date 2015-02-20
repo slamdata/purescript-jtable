@@ -9,13 +9,14 @@ import Text.Smolder.Markup ((!), text)
 import qualified Text.Smolder.Renderer.String (render) as Sm
 import qualified Data.Date as D
 import Debug.Trace
+import Debug.Spy
 
 import Data.Json.JSemantic
 
 
 main = do
-  let tf s j r = assert s $ toSemantic j == r
-  let tfm s j r = case r of Just x -> assert s $ toSemantic j == x
+  let tf s j r = assert s $ r == toSemanticDef j
+  let tfm s j r = case r of Just x -> assert s $ toSemanticDef j == x
                             Nothing -> assert s $ false
   test "toSemantic null" $ do
     tf "null" primNull NA
