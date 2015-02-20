@@ -55,11 +55,11 @@ Or use the compiled browser version at [examples/jtable.js](examples/jtable.js)
 -- default options
 renderJTableDef json
 
--- alphabetic column ordering, show header depth
-renderJTable defJTableOpts {
+-- alphabetic column ordering, show full path with length
+renderJTable jTableOptsDefault {
   style = noStyle { th = (\path -> th $ text $ 
-    (show $ length path) ++ " " ++ (show $ last path)) },
-  columnOrdering = alphaOrdering }
+    (show $ length path) ++ " " ++ show path) },
+  columnOrdering = alphaOrdering } json
 
 ```
 See the [Try it!](http://rawgit.com/brainrape/purescript-jtable/dev/examples/try.html) page and [examples/Examples.purs](examples/Examples.purs) for more usage examples.
