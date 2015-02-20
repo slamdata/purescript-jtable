@@ -18,13 +18,13 @@ var paths = {
         'all': {
             dest: 'MODULES.md',
             src: [
-              'src/Data.Json.JTable.purs',
-              'src/Data.Json.JTable.Internal.purs',
-              'src/Data.Json.JSemantic.purs'
+              'src/Data/Json/JTable.purs',
+              'src/Data/Json/JTable/Internal.purs',
+              'src/Data/Json/JSemantic.purs'
             ]
         }
     },
-    exampleSrc: 'examples/Data.Json.JTable.Examples.purs',
+    exampleSrc: 'examples/Examples.purs',
     test: 'test/**/*.purs'
 };
 
