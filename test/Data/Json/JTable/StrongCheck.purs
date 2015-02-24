@@ -4,11 +4,9 @@ import Data.Array
 import Data.Foldable
 import Data.Maybe
 import Data.Tuple
-import qualified Data.StrMap as SM
 import Debug.Trace
 import Debug.Spy
 
-import qualified Data.Argonaut as A
 import Data.Argonaut.Core (Json(..), jsonNull)
 import Data.Argonaut.JCursor
 import qualified Text.Smolder.HTML as H
@@ -16,33 +14,10 @@ import Text.Smolder.Markup (Markup(..), text)
 import qualified Text.Smolder.Renderer.String (render) as Sm
 
 import Test.StrongCheck
-import Test.StrongCheck.Gen
 
 import Data.Json.JTable
 import Data.Json.JTable.Internal
-
-
-genJsonArray :: Gen Json
-genJsonArray = sized \size -> 
-  (vectorOf size $ resize (size-1) genJson) <#> A.fromArray
-
-genJsonObject :: Gen Json
-genJsonObject = sized \size -> 
-  (vectorOf size $ resize (size-1) arbitrary) <#> SM.fromList >>> A.fromObject
-
-genJson :: Gen Json
-genJson = sized \size -> 
-  if size == 0 
-  then oneOf (pure jsonNull) [
-    arbitrary <#> A.fromBoolean,
-    arbitrary <#> A.fromNumber,
-    arbitrary <#> A.fromBoolean ] 
-  else oneOf (pure jsonNull) [
-    resize (size-1) genJsonArray,
-    resize (size-1) genJsonObject ]
-
-instance arbJson :: Arbitrary Json where
-  arbitrary = genJson
+import Data.Json.Gen
 
 
 -- repeat cells with [row|col]span 

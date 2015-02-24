@@ -237,4 +237,35 @@ toSemanticDef :: JsonPrim -> JSemantic
 
 
 
+## Module Data.Json.Gen
+
+#### `genJsonArray`
+
+``` purescript
+genJsonArray :: Gen Json
+```
+
+
+#### `genJsonObject`
+
+``` purescript
+genJsonObject :: Gen Json
+```
+
+
+#### `genJson`
+
+``` purescript
+genJson :: Gen Json
+```
+
+
+#### `arbJson`
+
+``` purescript
+instance arbJson :: Arbitrary Json
+```
+
+
+
 

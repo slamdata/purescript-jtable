@@ -20,7 +20,8 @@ var paths = {
             src: [
               'src/Data/Json/JTable.purs',
               'src/Data/Json/JTable/Internal.purs',
-              'src/Data/Json/JSemantic.purs'
+              'src/Data/Json/JSemantic.purs',
+              'src/Data/Json/Gen.purs'
             ]
         }
     },
@@ -68,7 +69,10 @@ function sequence () {
 
 gulp.task('browser', function() {
     return compile(purescript.psc, [paths.exampleSrc, paths.src].concat(paths.bowerSrc), {
-        output: 'jtable.js', main:'Data.Json.JTable.Examples'})
+            output: 'jtable.js', 
+            main:'Data.Json.JTable.Examples',
+            modules: ['Data.Json.JTable.Examples', 'Data.Json.JTable']
+        })
         .pipe(gulp.dest('examples'))
 });
 
