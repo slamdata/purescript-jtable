@@ -93,6 +93,20 @@ toPrim :: Json -> Maybe JsonPrim
 ```
 
 
+#### `zipWithIndex`
+
+``` purescript
+zipWithIndex :: forall a. [a] -> [Tuple a Number]
+```
+
+
+#### `orelse`
+
+``` purescript
+orelse :: forall a b. (a -> Maybe b) -> (a -> b) -> a -> b
+```
+
+
 #### `widthOfPrimTuple`
 
 ``` purescript

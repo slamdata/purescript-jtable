@@ -66,10 +66,11 @@ foldJsonP f =
 toPrim :: Json -> Maybe JsonPrim
 toPrim = foldJsonP Just (const Nothing) (const Nothing)
 
+zipWithIndex :: forall a. [a] -> [Tuple a Number]
 zipWithIndex xs = zip xs (0 .. ((length xs) - 1))
 
-orelse f g x = case f x of Just v -> v 
-                           _      -> g x
+orelse :: forall a b. (a -> Maybe b) -> (a -> b) -> (a -> b)
+orelse f g = fromMaybe <$> g <*> f 
 
 
 -- maybe return the width of a tuple composed of primitive values
@@ -86,7 +87,7 @@ widthOfPrimTuple hS path ja =
 -- add child to tree, unify if exists
 tMergeArray :: Tree -> Tree -> Tree
 tMergeArray (T l p w h k) nt@(T nl np nw nh nk) =
-  let i = findIndex (\n -> last np == last (n # tPath)) k in case k !! i of
+  let i = findIndex (tLabel >>> (== nl)) k in case k !! i of
     Just child_t@(T cl cp cw ch ck) -> case foldl tMergeArray child_t nk of 
       (T _ _ cw' ch' ck') -> let cw'' = max cw' nw
                                  w' = w - cw + cw''
