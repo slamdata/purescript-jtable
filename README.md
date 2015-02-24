@@ -173,9 +173,87 @@ Assume the following JSON:
 
 Note the difference in how `comments[*]` is rendered versus `replyTo[*]`, because the first one is classified as a list, while the second is classified as a tuple.
 
+### Tuple Examples
+
+```json
+[
+{
+ "voter": "Smith",
+ "preferences": [{"id": 123891, "label": "How to draw"}, {"id": 981234, "label": "How to climb stairs"}, {"id": 89231, "label": "How to paint"}]
+},
+{
+ "voter": "Mary",
+ "preferences": [{"id": 981234, "label": "How to climb stairs"}, {"id": 89231, "label": "How to paint"}, {"id": 123891, "label": "How to draw"}]
+},
+{
+ "voter": "Allen",
+ "preferences": [{"id": 89231, "label": "How to paint"}, {"id": 123891, "label": "How to draw"}, {"id": 981234, "label": "How to climb stairs"}]
+}
+]
+```
+
+```
+|-------|------------------------------|
+|       |         preferences          |
+|-------|--------|---------------------|
+| voter |   id   |        label        |
+|-------|--------|---------------------|
+| Smith | 123891 | How to draw         |
+|       |--------|---------------------|
+|       | 981234 | How to climb stairs |
+|       |--------|---------------------|
+|       |  89231 | How to paint        |
+|-------|--------|---------------------|
+| Mary  | 981234 | How to climb stairs |
+|       |--------|---------------------|
+|       |  89231 | How to paint        |
+|       |--------|---------------------|
+|       | 123891 | How to draw         |
+|-------|--------|---------------------|
+| Allen |  89231 | How to paint        |
+|       |--------|---------------------|
+|       | 123891 | How to draw         |
+|       |--------|---------------------|
+|       | 981234 | How to climb stairs |
+|-------|--------|---------------------|
+```
+
+---------------------
+
+```json
+[
+{
+ "voter": "Smith",
+ "ranking": [0, 2, 3, 1, 8]
+},
+{
+ "voter": "Mary",
+ "ranking": [1, 8, 3, 0, 2]
+},
+{
+ "voter": "Allen",
+ "ranking": [3, 0, 8, 1, 2]
+}
+]
+```
+
+```
+|-------|-------------------|
+| voter |      ranking      |
+|-------|-------------------|
+| Smith | 0 | 2 | 3 | 1 | 8 |
+|-------|-------------------|
+| Mary  | 1 | 8 | 3 | 0 | 2 |
+|-------|-------------------|
+| Allen | 3 | 0 | 8 | 1 | 2 |
+|-------|-------------------|
+```
+
+**Note**: This example will always be rendered like this regardless of the size of the tuples (e.g. 10-tuples).
+
 ### Other Examples
 
-Examples courtesy of @fresheyeball.
+Some examples courtesy of @fresheyeball.
 
 ```json
 [{
