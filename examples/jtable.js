@@ -3196,9 +3196,6 @@ PS.Data_Json_JSemantic = (function () {
     var Data_Argonaut_JCursor = PS.Data_Argonaut_JCursor;
     var Data_Maybe = PS.Data_Maybe;
     var Data_Array = PS.Data_Array;
-    var Data_Foldable = PS.Data_Foldable;
-    var Control_Apply = PS.Control_Apply;
-    var Control_MonadPlus = PS.Control_MonadPlus;
     var _s2n = function (Just) { return function(Nothing) {
   return function (s) { 
     var n = s * 1; if (isNaN(n)) {return Nothing} else {return Just(n)} 
@@ -3619,10 +3616,7 @@ PS.Data_Json_JTable_Internal = (function () {
     var Text_Smolder_Markup = PS.Text_Smolder_Markup;
     var Text_Smolder_HTML = PS.Text_Smolder_HTML;
     var Data_Either = PS.Data_Either;
-    var Control_Alt = PS.Control_Alt;
-    var Control_Apply = PS.Control_Apply;
     var Control_Bind = PS.Control_Bind;
-    var Control_Monad = PS.Control_Monad;
     var Data_Argonaut_Parser = PS.Data_Argonaut_Parser;
     
     /**
@@ -4939,14 +4933,11 @@ PS.Data_Json_JTable_Examples = (function () {
     var Control_Monad_Trampoline = PS.Control_Monad_Trampoline;
     var Test_StrongCheck_Gen = PS.Test_StrongCheck_Gen;
     var Data_Json_Gen = PS.Data_Json_Gen;
-    var $$Math = PS.$$Math;
     var Data_Either = PS.Data_Either;
     var Data_Argonaut_Core = PS.Data_Argonaut_Core;
-    var Test_StrongCheck = PS.Test_StrongCheck;
     var Control_Monad_Eff = PS.Control_Monad_Eff;
     var Control_Timer = PS.Control_Timer;
     var DOM = PS.DOM;
-    var Debug_Trace = PS.Debug_Trace;
     var Debug_Spy = PS.Debug_Spy;
     var Control_Monad_Free = PS.Control_Monad_Free;
     var Data_Lazy = PS.Data_Lazy;

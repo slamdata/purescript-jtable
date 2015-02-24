@@ -1,17 +1,17 @@
 module Test.Data.Json.JTable.Unit where
 
-import Test.Unit
-import Data.Maybe
-import Data.Argonaut.Core
+import Test.Unit (test, assert)
+import Data.Maybe (Maybe(..))
+import Data.Argonaut.Core (Json(..))
 import Data.Argonaut.JCursor (primToJson, primNull)
 import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, span, small)
 import Text.Smolder.Markup ((!), text)
 import qualified Text.Smolder.Renderer.String (render) as Sm
-import Debug.Trace
-import Debug.Spy
+import Debug.Spy (spy)
+-- import Data.Traversable (for)
 
-import Data.Json.JTable.Internal
-import Data.Json.JTable
+import Data.Json.JTable.Internal (widthOfPrimTuple, strcmp, renderJTableRaw)
+import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
 
 
 jNull = primToJson primNull
@@ -34,8 +34,6 @@ foreign import jObj2EArr "var jObj2EArr = {a:[], b:'one'}" :: Json
 foreign import jObjWeird "var jObjWeird = {a:{x:[1,2,3,4], y:[]}, b:[1,2,3,4,5]}" :: Json
 foreign import jArrObj2Tups "var jArrObj2Tups = [{a:[3,2,1],b:[1,2]},{a:null,b:[3,2,1]}]" :: Json
 
-import Data.Traversable (for)
-import Data.Maybe
 
 main = do
   test "widthOfPrimTuple" do

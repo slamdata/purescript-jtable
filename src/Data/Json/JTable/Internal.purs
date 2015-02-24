@@ -9,23 +9,21 @@ module Data.Json.JTable.Internal
   ) where
 
 import Math (max)
-import Data.Either
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
-import Data.Tuple
+import Data.Tuple (Tuple(..), fst, snd, uncurry, zip)
 import Data.String (joinWith, localeCompare)
-import Data.Array
-import Data.Foldable
+import Data.Array (head, tail, length, null, singleton, snoc, concat, 
+                   sortBy, nub, findIndex, updateAt, (!!), (..))
 import qualified Data.StrMap as M
 import Data.Foldable (foldl, any, all, mconcat, elem)
 import Data.Traversable (for)
-import Control.Alt
-import Control.Apply
-import Control.Bind
-import Control.Monad
-import Control.MonadPlus
+import Control.Bind ((=<<))
+import Control.MonadPlus (guard)
 
-import Data.Argonaut.Core
-import Data.Argonaut.JCursor
+import Data.Argonaut.Core (Json(..), JArray(..), JObject(..), foldJson, toObject)
+import Data.Argonaut.JCursor (JCursor(..), JsonPrim(..), downField, downIndex, 
+                              primNull, primBool, primNum, primStr, primToJson)
 import Data.Argonaut.Parser (jsonParser)
 import Text.Smolder.HTML (thead, tbody, tr, th, td)
 import Text.Smolder.Markup (Markup(..), Attribute(..), attribute, (!))

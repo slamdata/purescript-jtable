@@ -1,32 +1,30 @@
 module Data.Json.JTable.Examples where
 
-import Math
 import Data.String (split)
 import Data.Array (length, head, tail, (!!))
-import Data.Maybe
-import Data.Tuple
-import Data.Either
-import Data.Argonaut.Core
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Tuple (Tuple(..), fst)
+import Data.Either (Either(..))
+import Data.Argonaut.Core (Json(..))
 import Data.Argonaut.JCursor (primToJson, primNull)
-import Data.Argonaut.Parser
+import Data.Argonaut.Parser (jsonParser)
 import Text.Smolder.HTML (tr, th, td, br, span, small)
 import Text.Smolder.HTML.Attributes (style)
 import Text.Smolder.Markup (Markup(..), (!), text)
 import qualified Text.Smolder.Renderer.String as SmR
-import Test.StrongCheck
-import Test.StrongCheck.Gen
-import Control.Monad.Eff
-import Control.Monad.Eff.Random
-import Control.Monad.Trampoline
-import Control.Bind
-import Control.Timer
-import DOM
-import Debug.Trace
-import Debug.Spy
+import Test.StrongCheck.Gen (GenState(..), runGen)
+import Control.Monad.Eff (Eff(..))
+import Control.Monad.Eff.Random (random)
+import Control.Monad.Trampoline (runTrampoline)
+import Control.Bind ((<=<))
+import Control.Timer (Timer(..))
+import DOM (DOM(..))
+import Debug.Spy (spy)
 
-import Data.Json.JTable
-import Data.Json.JSemantic
-import Data.Json.Gen
+import Data.Json.JSemantic (JSemantic(..), toSemanticDef)
+import Data.Json.Gen (genJson)
+import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault, 
+                         debugStyle, noStyle, alphaOrdering)
 
 
 exDefault = renderJTableDef

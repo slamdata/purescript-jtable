@@ -1,23 +1,22 @@
 module Test.Data.Json.JTable.StrongCheck where
 
-import Data.Array
-import Data.Foldable
-import Data.Maybe
-import Data.Tuple
-import Debug.Trace
-import Debug.Spy
-
+import Data.Array (null, length, head, last, snoc, nub, (..))
+import Data.Foldable (foldl)
+import Data.Maybe (fromMaybe)
+import Data.Tuple (Tuple(..), fst)
 import Data.Argonaut.Core (Json(..), jsonNull)
-import Data.Argonaut.JCursor
+import Data.Argonaut.JCursor (JCursor(..))
 import qualified Text.Smolder.HTML as H
 import Text.Smolder.Markup (Markup(..), text)
 import qualified Text.Smolder.Renderer.String (render) as Sm
+import Test.StrongCheck (quickCheck, Result(..), (<?>))
+import Debug.Trace (print, trace)
+import Debug.Spy (spy)
 
-import Test.StrongCheck
-
-import Data.Json.JTable
-import Data.Json.JTable.Internal
-import Data.Json.Gen
+import Data.Json.Gen (genJson)
+import Data.Json.JTable.Internal (
+  Tree(..), tWidth, tHeight, tKids, tFromJson, tsToRows,
+  Cell(..), cWidth, cHeight, cFromJson, renderRows)
 
 
 -- repeat cells with [row|col]span 

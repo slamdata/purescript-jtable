@@ -5,15 +5,15 @@ module Data.Json.JTable
   , TableStyle(..), noStyle, bootstrapStyle, debugStyle
   ) where
 
-import Data.Json.JTable.Internal
-
 import Data.String (joinWith)
-import Data.Argonaut.Core
-import Data.Argonaut.JCursor
+import Data.Argonaut.Core (Json(..))
+import Data.Argonaut.JCursor (JCursor(..), JsonPrim(..), runJsonPrim)
 import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, small)
 import Text.Smolder.HTML.Attributes (className)
 import Text.Smolder.Markup (Markup(..), MarkupM(..), Attributable, attribute, (!), text)
 import Data.Foldable (mconcat)
+
+import Data.Json.JTable.Internal (JPath(..), Tree(..), Cell(..), renderJTableRaw, strcmp)
 
 -- type JPath = [String]
 

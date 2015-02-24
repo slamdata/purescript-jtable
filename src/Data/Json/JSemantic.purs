@@ -4,16 +4,13 @@ module Data.Json.JSemantic
   ) where
 
 import Data.Argonaut.JCursor(JsonPrim(..), runJsonPrim)
-import Data.Maybe
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Array (head, tail)
 import Data.String (split)
 import Data.String.Regex (Regex(..), regex, test, match, noFlags, parseFlags, replace)
-import Data.Foldable
 import qualified Data.Date as Date
-import Control.Alt
-import Control.Apply
-import Control.MonadPlus
-import Math
+import Control.Alt ((<|>))
+import Math (floor)
 
 
 data JSemantic = Integral   Number
