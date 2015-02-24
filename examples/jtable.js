@@ -3214,12 +3214,12 @@ PS.Data_Json_JSemantic = (function () {
     var Prelude = PS.Prelude;
     var Data_String_Regex = PS.Data_String_Regex;
     var $$Math = PS.$$Math;
-    var Data_Array = PS.Data_Array;
     var Data_Date = PS.Data_Date;
     var Data_String = PS.Data_String;
     var Control_Alt = PS.Control_Alt;
     var Data_Argonaut_JCursor = PS.Data_Argonaut_JCursor;
     var Data_Maybe = PS.Data_Maybe;
+    var Data_Array = PS.Data_Array;
     var Data_Foldable = PS.Data_Foldable;
     var Control_Apply = PS.Control_Apply;
     var Control_MonadPlus = PS.Control_MonadPlus;
@@ -3338,9 +3338,12 @@ PS.Data_Json_JSemantic = (function () {
         return function (parser) {
             return function (constr) {
                 return function (s) {
-                    return Prelude[">>="](Data_Maybe.bindMaybe)(Prelude[">>="](Data_Maybe.bindMaybe)(Prelude[">>="](Data_Maybe.bindMaybe)(Data_String_Regex.match(regexp)(s))(Data_Array.tail))(Data_Array.head))(function (s_1) {
-                        return Prelude["<$>"](Data_Maybe.functorMaybe)(constr)(parser(s_1));
-                    });
+                    var _1608 = Data_String_Regex.match(regexp)(s);
+                    if (_1608 instanceof Data_Maybe.Just && _1608.value0.length >= 2) {
+                        var _1612 = _1608.value0.slice(2);
+                        return Prelude["<$>"](Data_Maybe.functorMaybe)(constr)(parser(_1608.value0[1]));
+                    };
+                    return Data_Maybe.Nothing.value;
                 };
             };
         };
@@ -3350,11 +3353,11 @@ PS.Data_Json_JSemantic = (function () {
     };
     var parseInterval = function (r) {
         return function (s) {
-            var _1608 = Data_String.split(" - ")(s);
-            if (_1608.length >= 2) {
-                var _1611 = _1608.slice(2);
-                if (_1611.length === 0 && (Data_String_Regex.test(r)(_1608[0]) && Data_String_Regex.test(r)(_1608[1]))) {
-                    return Prelude["<*>"](Data_Maybe.applyMaybe)(Prelude["<$>"](Data_Maybe.functorMaybe)(Interval.create)(Data_Date.fromString(_1608[0])))(Data_Date.fromString(_1608[1]));
+            var _1613 = Data_String.split(" - ")(s);
+            if (_1613.length >= 2) {
+                var _1616 = _1613.slice(2);
+                if (_1616.length === 0 && (Data_String_Regex.test(r)(_1613[0]) && Data_String_Regex.test(r)(_1613[1]))) {
+                    return Prelude["<*>"](Data_Maybe.applyMaybe)(Prelude["<$>"](Data_Maybe.functorMaybe)(Interval.create)(Data_Date.fromString(_1613[0])))(Data_Date.fromString(_1613[1]));
                 };
             };
             return Data_Maybe.Nothing.value;
@@ -3743,22 +3746,22 @@ PS.Data_Json_JTable_Internal = (function () {
             var i = Data_Array.findIndex(function (n) {
                 return Prelude["=="](Data_Maybe.eqMaybe(Prelude.eqString))(Data_Array.last(_1047.value1))(Data_Array.last(tPath(n)));
             })(_1046.value4);
-            var _1661 = Data_Array["!!"](_1046.value4)(i);
-            if (_1661 instanceof Data_Maybe.Just) {
-                var _1662 = Data_Foldable.foldl(Data_Foldable.foldableArray)(tMergeArray)(_1661.value0)(_1047.value4);
-                var h$prime = $$Math.max(_1046.value3)(_1662.value3 + 1);
-                var cw$prime$prime = $$Math.max(_1662.value2)(_1047.value2);
-                var k$prime = Data_Array.updateAt(i)(new T(_1661.value0.value0, _1661.value0.value1, cw$prime$prime, _1662.value3, _1662.value4))(_1046.value4);
-                var w$prime = (_1046.value2 - _1661.value0.value2) + cw$prime$prime;
+            var _1666 = Data_Array["!!"](_1046.value4)(i);
+            if (_1666 instanceof Data_Maybe.Just) {
+                var _1667 = Data_Foldable.foldl(Data_Foldable.foldableArray)(tMergeArray)(_1666.value0)(_1047.value4);
+                var h$prime = $$Math.max(_1046.value3)(_1667.value3 + 1);
+                var cw$prime$prime = $$Math.max(_1667.value2)(_1047.value2);
+                var k$prime = Data_Array.updateAt(i)(new T(_1666.value0.value0, _1666.value0.value1, cw$prime$prime, _1667.value3, _1667.value4))(_1046.value4);
+                var w$prime = (_1046.value2 - _1666.value0.value2) + cw$prime$prime;
                 return new T(_1046.value0, _1046.value1, w$prime, h$prime, k$prime);
             };
-            if (_1661 instanceof Data_Maybe.Nothing) {
+            if (_1666 instanceof Data_Maybe.Nothing) {
                 var w$prime = (function () {
-                    var _1674 = Data_Array["null"](_1046.value4);
-                    if (_1674) {
+                    var _1679 = Data_Array["null"](_1046.value4);
+                    if (_1679) {
                         return _1047.value2;
                     };
-                    if (!_1674) {
+                    if (!_1679) {
                         return _1046.value2 + _1047.value2;
                     };
                     throw new Error("Failed pattern match");
@@ -3778,11 +3781,11 @@ PS.Data_Json_JTable_Internal = (function () {
      *  produce header rows from header tree
      */
     var tsToRows = function (ts) {
-        var _1691 = Data_Array["null"](ts);
-        if (_1691) {
+        var _1696 = Data_Array["null"](ts);
+        if (_1696) {
             return [  ];
         };
-        if (!_1691) {
+        if (!_1696) {
             return Prelude[":"](ts)(tsToRows(Prelude[">>="](Data_Array.bindArray)(ts)(tKids)));
         };
         throw new Error("Failed pattern match");
@@ -3829,16 +3832,16 @@ PS.Data_Json_JTable_Internal = (function () {
      */
     var padTree = function (_1060) {
         return function (_1061) {
-            var _1725 = !Data_Array["null"](_1061.value4);
-            if (_1725) {
+            var _1730 = !Data_Array["null"](_1061.value4);
+            if (_1730) {
                 return new T(_1061.value0, _1061.value1, _1061.value2, _1061.value3, Prelude["<#>"](Data_Array.functorArray)(_1061.value4)(padTree(_1060 - 1)));
             };
-            if (!_1725) {
-                var _1726 = _1060 > 0;
-                if (_1726) {
+            if (!_1730) {
+                var _1731 = _1060 > 0;
+                if (_1731) {
                     return new T("", _1061.value1, _1061.value2, 1, [ padTree(_1060 - 1)(_1061) ]);
                 };
-                if (!_1726) {
+                if (!_1731) {
                     return new T(_1061.value0, _1061.value1, _1061.value2, 1, _1061.value4);
                 };
                 throw new Error("Failed pattern match");
@@ -3849,9 +3852,9 @@ PS.Data_Json_JTable_Internal = (function () {
     var orelse = function (f) {
         return function (g) {
             return function (x) {
-                var _1732 = f(x);
-                if (_1732 instanceof Data_Maybe.Just) {
-                    return _1732.value0;
+                var _1737 = f(x);
+                if (_1737 instanceof Data_Maybe.Just) {
+                    return _1737.value0;
                 };
                 return g(x);
             };
@@ -3878,11 +3881,11 @@ PS.Data_Json_JTable_Internal = (function () {
                     return new T(label, path, 1, 0, [  ]);
                 };
                 var obj = function (jo) {
-                    var _1735 = Data_StrMap.isEmpty(jo);
-                    if (_1735) {
+                    var _1740 = Data_StrMap.isEmpty(jo);
+                    if (_1740) {
                         return new T(label, path, 1, 0, [  ]);
                     };
-                    if (!_1735) {
+                    if (!_1740) {
                         var k = Prelude["<#>"](Data_Array.functorArray)(Data_StrMap.toList(jo))(Data_Tuple.uncurry(function (l) {
                             return function (j) {
                                 return tFromJson(hS)(l)(Data_Array.snoc(path)(l))(j);
@@ -3897,11 +3900,11 @@ PS.Data_Json_JTable_Internal = (function () {
                 var array = function (ja) {
                     var ts = Prelude["<#>"](Data_Array.functorArray)(ja)(tFromJson(hS)(label)(path));
                     var tsw = (function () {
-                        var _1736 = Data_Array.nub(Prelude.eqNumber)(Prelude["<#>"](Data_Array.functorArray)(ts)(tWidth));
-                        if (_1736.length >= 1) {
-                            var _1738 = _1736.slice(1);
-                            if (_1738.length === 0) {
-                                return _1736[0];
+                        var _1741 = Data_Array.nub(Prelude.eqNumber)(Prelude["<#>"](Data_Array.functorArray)(ts)(tWidth));
+                        if (_1741.length >= 1) {
+                            var _1743 = _1741.slice(1);
+                            if (_1743.length === 0) {
+                                return _1741[0];
                             };
                         };
                         return 1;
@@ -3929,15 +3932,15 @@ PS.Data_Json_JTable_Internal = (function () {
                         return Data_Maybe.fromMaybe(_0)(Data_Array["!!"](rs)(n));
                     };
                     if (rs.length >= 1) {
-                        var _1747 = rs.slice(1);
-                        if (_1747.length === 0) {
-                            var _1740 = n === 0;
-                            if (_1740) {
+                        var _1752 = rs.slice(1);
+                        if (_1752.length === 0) {
+                            var _1745 = n === 0;
+                            if (_1745) {
                                 return Prelude["<#>"](Data_Array.functorArray)(rs[0])(function (_1031) {
                                     return new C(_1031.value0, _1031.value1, maxh, _1031.value3);
                                 });
                             };
-                            if (!_1740) {
+                            if (!_1745) {
                                 return rnOr([  ]);
                             };
                             throw new Error("Failed pattern match");
@@ -3973,11 +3976,11 @@ PS.Data_Json_JTable_Internal = (function () {
         return function (_1053) {
             return function (_1054) {
                 var width = (function () {
-                    var _1767 = _1053.value3 <= 0 && _1053.value2 > 1;
-                    if (_1767) {
+                    var _1772 = _1053.value3 <= 0 && _1053.value2 > 1;
+                    if (_1772) {
                         return widthOfPrimTuple(_1052)(_1053.value1);
                     };
-                    if (!_1767) {
+                    if (!_1772) {
                         return Prelude["const"](Data_Maybe.Nothing.value);
                     };
                     throw new Error("Failed pattern match");
@@ -3994,18 +3997,18 @@ PS.Data_Json_JTable_Internal = (function () {
                 };
                 var objtup = mergeObjTuple(_1052)(_1053)(_1054);
                 var tuple = function (ja) {
-                    var _1769 = primtup(ja);
-                    if (_1769 instanceof Data_Maybe.Nothing) {
+                    var _1774 = primtup(ja);
+                    if (_1774 instanceof Data_Maybe.Nothing) {
                         return objtup(ja);
                     };
-                    return _1769;
+                    return _1774;
                 };
                 var obj = function (jo) {
-                    var _1770 = Data_StrMap.isEmpty(jo);
-                    if (_1770) {
+                    var _1775 = Data_StrMap.isEmpty(jo);
+                    if (_1775) {
                         return [ [ new C(_1054, _1053.value2, 1, Data_Argonaut_JCursor.primNull) ] ];
                     };
-                    if (!_1770) {
+                    if (!_1775) {
                         return cMergeObj(Prelude["<#>"](Data_Array.functorArray)(_1053.value4)(function (_1034) {
                             var j = Data_Maybe.fromMaybe(Data_Argonaut_JCursor.primToJson(Data_Argonaut_JCursor.primNull))(Data_StrMap.lookup(_1034.value0)(jo));
                             return new Data_Tuple.Tuple(_1034.value2, cFromJson(_1052)(_1034)(Data_Argonaut_JCursor.downField(_1034.value0)(_1054))(j));
@@ -4027,11 +4030,11 @@ PS.Data_Json_JTable_Internal = (function () {
     var _nattr = function (attr) {
         return function (n) {
             return function (m) {
-                var _1782 = n > 1;
-                if (_1782) {
+                var _1787 = n > 1;
+                if (_1787) {
                     return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupM)(m)(Text_Smolder_Markup.attribute(attr)(Prelude.show(Prelude.showNumber)(n)));
                 };
-                if (!_1782) {
+                if (!_1787) {
                     return m;
                 };
                 throw new Error("Failed pattern match");
@@ -4061,11 +4064,11 @@ PS.Data_Json_JTable_Internal = (function () {
             return function (_1057) {
                 var rs = function (i) {
                     return function (k_1) {
-                        var _1793 = Data_Array["null"](k_1);
-                        if (_1793) {
+                        var _1798 = Data_Array["null"](k_1);
+                        if (_1798) {
                             return _1057.value3 - i;
                         };
-                        if (!_1793) {
+                        if (!_1798) {
                             return 1;
                         };
                         throw new Error("Failed pattern match");
@@ -4164,28 +4167,28 @@ PS.Data_Json_JTable = (function () {
     };
     var renderJTable = function (o) {
         return Data_Json_JTable_Internal.renderJTableRaw((function () {
-            var _1821 = {};
-            for (var _1822 in o) {
-                if (o.hasOwnProperty(_1822)) {
-                    _1821[_1822] = o[_1822];
+            var _1826 = {};
+            for (var _1827 in o) {
+                if (o.hasOwnProperty(_1827)) {
+                    _1826[_1827] = o[_1827];
                 };
             };
-            _1821.style = (function () {
-                var _1819 = {};
-                for (var _1820 in o.style) {
-                    if (o.style.hasOwnProperty(_1820)) {
-                        _1819[_1820] = o.style[_1820];
+            _1826.style = (function () {
+                var _1824 = {};
+                for (var _1825 in o.style) {
+                    if (o.style.hasOwnProperty(_1825)) {
+                        _1824[_1825] = o.style[_1825];
                     };
                 };
-                _1819.th = function (_1070) {
+                _1824.th = function (_1070) {
                     return o.style.th(_1070.value0)(_1070.value1);
                 };
-                _1819.td = function (_1071) {
+                _1824.td = function (_1071) {
                     return o.style.td(_1071.value0)(_1071.value3);
                 };
-                return _1819;
+                return _1824;
             })();
-            return _1821;
+            return _1826;
         })());
     };
     var noStyle = {
@@ -4219,35 +4222,35 @@ PS.Data_Json_JTable = (function () {
     };
     var renderJTableDef = renderJTable(jTableOptsDefault);
     var debugStyle = (function () {
-        var _1823 = {};
-        for (var _1824 in noStyle) {
-            if (noStyle.hasOwnProperty(_1824)) {
-                _1823[_1824] = noStyle[_1824];
+        var _1828 = {};
+        for (var _1829 in noStyle) {
+            if (noStyle.hasOwnProperty(_1829)) {
+                _1828[_1829] = noStyle[_1829];
             };
         };
-        _1823.th = function (l) {
+        _1828.th = function (l) {
             return function (p) {
                 return Text_Smolder_HTML.th(Text_Smolder_Markup.text(Data_String.joinWith(".")(p)));
             };
         };
-        _1823.td = function (c) {
+        _1828.td = function (c) {
             return function (j) {
                 return Text_Smolder_HTML.td(Data_Foldable.mconcat(Data_Foldable.foldableArray)(Text_Smolder_Markup.monoidMarkup)([ Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.small)(Text_Smolder_HTML_Attributes.className("grey"))(Text_Smolder_Markup.text(Prelude.show(Data_Argonaut_JCursor.showJCursor)(c))), Text_Smolder_HTML.br, Text_Smolder_Markup.text(Prelude.show(Data_Argonaut_JCursor.showJsonPrim)(j)) ]));
             };
         };
-        return _1823;
+        return _1828;
     })();
     var bootstrapStyle = (function () {
-        var _1825 = {};
-        for (var _1826 in noStyle) {
-            if (noStyle.hasOwnProperty(_1826)) {
-                _1825[_1826] = noStyle[_1826];
+        var _1830 = {};
+        for (var _1831 in noStyle) {
+            if (noStyle.hasOwnProperty(_1831)) {
+                _1830[_1831] = noStyle[_1831];
             };
         };
-        _1825.table = function (m) {
+        _1830.table = function (m) {
             return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.table)(Text_Smolder_Markup.attribute("class")("table"))(m);
         };
-        return _1825;
+        return _1830;
     })();
     var alphaOrdering = function (l1) {
         return function (p1) {
@@ -4350,11 +4353,11 @@ PS.Text_Smolder_Renderer_String = (function () {
             var showAttrs = function (a_1) {
                 var pair = function (k) {
                     return " " + (k + (function () {
-                        var _1845 = Data_Map.lookup(Prelude.ordString)(k)(a_1);
-                        if (_1845 instanceof Data_Maybe.Just) {
-                            return "=\"" + (_1845.value0 + "\"");
+                        var _1850 = Data_Map.lookup(Prelude.ordString)(k)(a_1);
+                        if (_1850 instanceof Data_Maybe.Just) {
+                            return "=\"" + (_1850.value0 + "\"");
                         };
-                        if (_1845 instanceof Data_Maybe.Nothing) {
+                        if (_1850 instanceof Data_Maybe.Nothing) {
                             return "";
                         };
                         throw new Error("Failed pattern match");
@@ -4462,16 +4465,16 @@ PS.Test_StrongCheck_Gen = (function () {
                                     return Prelude.pure(__dict_Monad_940["__superclass_Prelude.Applicative_0"]())(Data_Machine_Mealy.Halt.value);
                                 };
                                 if (_1112 instanceof Data_Machine_Mealy.Emit) {
-                                    var _1861 = _1095(b_1)(_1112.value0.value0.value);
-                                    if (_1861.value1 instanceof Data_Maybe.Nothing) {
-                                        return Data_Machine_Mealy.stepMealy(__dict_Monad_940)(_1112.value0.value0.state)(loop(_1112.value1)(_1861.value0));
+                                    var _1866 = _1095(b_1)(_1112.value0.value0.value);
+                                    if (_1866.value1 instanceof Data_Maybe.Nothing) {
+                                        return Data_Machine_Mealy.stepMealy(__dict_Monad_940)(_1112.value0.value0.state)(loop(_1112.value1)(_1866.value0));
                                     };
-                                    if (_1861.value1 instanceof Data_Maybe.Just) {
+                                    if (_1866.value1 instanceof Data_Maybe.Just) {
                                         var c$prime = new GenOut({
-                                            value: _1861.value1.value0, 
+                                            value: _1866.value1.value0, 
                                             state: _1112.value0.value0.state
                                         });
-                                        return Prelude.pure(__dict_Monad_940["__superclass_Prelude.Applicative_0"]())(new Data_Machine_Mealy.Emit(c$prime, loop(_1112.value1)(_1861.value0)));
+                                        return Prelude.pure(__dict_Monad_940["__superclass_Prelude.Applicative_0"]())(new Data_Machine_Mealy.Emit(c$prime, loop(_1112.value1)(_1866.value0)));
                                     };
                                     throw new Error("Failed pattern match");
                                 };
@@ -4528,14 +4531,14 @@ PS.Test_StrongCheck_Gen = (function () {
         return function (sz) {
             return function (g) {
                 return GenT.create(Data_Profunctor.lmap(Data_Machine_Mealy.profunctorMealy(__dict_Monad_947))(stateM(function (s) {
-                    var _1878 = {};
-                    for (var _1879 in s) {
-                        if (s.hasOwnProperty(_1879)) {
-                            _1878[_1879] = s[_1879];
+                    var _1883 = {};
+                    for (var _1884 in s) {
+                        if (s.hasOwnProperty(_1884)) {
+                            _1883[_1884] = s[_1884];
                         };
                     };
-                    _1878.size = sz;
-                    return _1878;
+                    _1883.size = sz;
+                    return _1883;
                 }))(unGen(g)));
             };
         };
@@ -4653,11 +4656,11 @@ PS.Test_StrongCheck_Gen = (function () {
                         return Data_Machine_Mealy.mealy(__dict_Monad_968["__superclass_Prelude.Applicative_0"]())(function (st) {
                             var f = function (_1110) {
                                 if (_1110 instanceof Data_Machine_Mealy.Halt) {
-                                    var _1905 = i >= _1087;
-                                    if (_1905) {
+                                    var _1910 = i >= _1087;
+                                    if (_1910) {
                                         return Prelude.pure(__dict_Monad_968["__superclass_Prelude.Applicative_0"]())(Data_Machine_Mealy.Halt.value);
                                     };
-                                    if (!_1905) {
+                                    if (!_1910) {
                                         return Data_Machine_Mealy.stepMealy(__dict_Monad_968)(st)(loop(i)(_1088.value0));
                                     };
                                     throw new Error("Failed pattern match");
@@ -4705,11 +4708,11 @@ PS.Test_StrongCheck_Gen = (function () {
                 var f = function (b) {
                     return function (a) {
                         var b$prime = Prelude["<>"](Data_Array.semigroupArray)(b)([ a ]);
-                        var _1909 = Data_Array.length(b$prime) >= n;
-                        if (_1909) {
+                        var _1914 = Data_Array.length(b$prime) >= n;
+                        if (_1914) {
                             return new Data_Tuple.Tuple([  ], new Data_Maybe.Just(b$prime));
                         };
-                        if (!_1909) {
+                        if (!_1914) {
                             return new Data_Tuple.Tuple(b$prime, Data_Maybe.Nothing.value);
                         };
                         throw new Error("Failed pattern match");
@@ -4783,11 +4786,11 @@ PS.Test_StrongCheck_Gen = (function () {
         return function (x) {
             return function (xs) {
                 return Prelude[">>="](bindGenT(__dict_Monad_983))(chooseInt(__dict_Monad_983)(0)(Data_Array.length(xs)))(function (_46) {
-                    var _1921 = _46 === 0;
-                    if (_1921) {
+                    var _1926 = _46 === 0;
+                    if (_1926) {
                         return x;
                     };
-                    if (!_1921) {
+                    if (!_1926) {
                         return Data_Maybe.fromMaybe(x)(Data_Array["!!"](xs)(_46 - 1));
                     };
                     throw new Error("Failed pattern match");
@@ -4929,11 +4932,11 @@ PS.Data_Json_Gen = (function () {
         return Prelude["<#>"](Test_StrongCheck_Gen.functorGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Test_StrongCheck_Gen.vectorOf(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(size)(Test_StrongCheck_Gen.resize(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(size - 1)(genJson)))(Data_Argonaut.fromArray);
     });
     var genJson = Test_StrongCheck_Gen.sized(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(function (size) {
-        var _1927 = size === 0;
-        if (_1927) {
+        var _1932 = size === 0;
+        if (_1932) {
             return Test_StrongCheck_Gen.oneOf(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(Prelude.pure(Test_StrongCheck_Gen.applicativeGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Data_Argonaut_Core.jsonNull))([ Prelude["<#>"](Test_StrongCheck_Gen.functorGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Test_StrongCheck.arbitrary(Test_StrongCheck.arbBoolean))(Data_Argonaut.fromBoolean), Prelude["<#>"](Test_StrongCheck_Gen.functorGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Test_StrongCheck.arbitrary(Test_StrongCheck.arbNumber))(Data_Argonaut.fromNumber), Prelude["<#>"](Test_StrongCheck_Gen.functorGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Test_StrongCheck.arbitrary(Test_StrongCheck.arbBoolean))(Data_Argonaut.fromBoolean) ]);
         };
-        if (!_1927) {
+        if (!_1932) {
             return Test_StrongCheck_Gen.oneOf(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(Prelude.pure(Test_StrongCheck_Gen.applicativeGenT(Control_Monad_Free.monadFree(Data_Lazy.functorLazy)))(Data_Argonaut_Core.jsonNull))([ Test_StrongCheck_Gen.resize(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(size - 1)(genJsonArray), Test_StrongCheck_Gen.resize(Control_Monad_Free.monadFree(Data_Lazy.functorLazy))(size - 1)(genJsonObject) ]);
         };
         throw new Error("Failed pattern match");
@@ -5025,131 +5028,131 @@ PS.Data_Json_JTable_Examples = (function () {
      *  we use style instead of class to keep it self-contained
      */
     var exSemantic = Data_Json_JTable.renderJTable((function () {
-        var _1949 = {};
-        for (var _1950 in Data_Json_JTable.jTableOptsDefault) {
-            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1950)) {
-                _1949[_1950] = Data_Json_JTable.jTableOptsDefault[_1950];
+        var _1954 = {};
+        for (var _1955 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1955)) {
+                _1954[_1955] = Data_Json_JTable.jTableOptsDefault[_1955];
             };
         };
-        _1949.style = (function () {
-            var _1947 = {};
-            for (var _1948 in Data_Json_JTable.noStyle) {
-                if (Data_Json_JTable.noStyle.hasOwnProperty(_1948)) {
-                    _1947[_1948] = Data_Json_JTable.noStyle[_1948];
+        _1954.style = (function () {
+            var _1952 = {};
+            for (var _1953 in Data_Json_JTable.noStyle) {
+                if (Data_Json_JTable.noStyle.hasOwnProperty(_1953)) {
+                    _1952[_1953] = Data_Json_JTable.noStyle[_1953];
                 };
             };
-            _1947.td = function (c) {
+            _1952.td = function (c) {
                 return function (j) {
-                    var _1929 = Data_Json_JSemantic.toSemanticDef(j);
-                    if (_1929 instanceof Data_Json_JSemantic.Integral) {
-                        return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("text-align:right"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0)));
+                    var _1934 = Data_Json_JSemantic.toSemanticDef(j);
+                    if (_1934 instanceof Data_Json_JSemantic.Integral) {
+                        return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("text-align:right"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0)));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Fractional) {
+                    if (_1934 instanceof Data_Json_JSemantic.Fractional) {
                         return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("text-align:right"))((function () {
-                            var _1931 = Data_String.split(".")(Prelude.show(Prelude.showNumber)(_1929.value0));
-                            if (_1931.length >= 2) {
-                                var _1934 = _1931.slice(2);
-                                if (_1934.length === 0) {
-                                    return Prelude[">>="](Text_Smolder_Markup.bindMarkupM)(Text_Smolder_Markup.text(_1931[0]))(function () {
-                                        return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.small)(Text_Smolder_HTML_Attributes.style("color:#aaa"))(Text_Smolder_Markup.text("." + _1931[1]));
+                            var _1936 = Data_String.split(".")(Prelude.show(Prelude.showNumber)(_1934.value0));
+                            if (_1936.length >= 2) {
+                                var _1939 = _1936.slice(2);
+                                if (_1939.length === 0) {
+                                    return Prelude[">>="](Text_Smolder_Markup.bindMarkupM)(Text_Smolder_Markup.text(_1936[0]))(function () {
+                                        return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.small)(Text_Smolder_HTML_Attributes.style("color:#aaa"))(Text_Smolder_Markup.text("." + _1936[1]));
                                     });
                                 };
                             };
-                            return Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0));
+                            return Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0));
                         })());
                     };
-                    if (_1929 instanceof Data_Json_JSemantic["Date"]) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1929.value0)));
+                    if (_1934 instanceof Data_Json_JSemantic["Date"]) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1934.value0)));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.DateTime) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1929.value0)));
+                    if (_1934 instanceof Data_Json_JSemantic.DateTime) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1934.value0)));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Time) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1929.value0)));
+                    if (_1934 instanceof Data_Json_JSemantic.Time) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1934.value0)));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Interval) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1929.value0) + (" - " + Prelude.show(Data_Date.showDate)(_1929.value1))));
+                    if (_1934 instanceof Data_Json_JSemantic.Interval) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Data_Date.showDate)(_1934.value0) + (" - " + Prelude.show(Data_Date.showDate)(_1934.value1))));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Text) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text("&laquo;" + (_1929.value0 + "&raquo;")));
+                    if (_1934 instanceof Data_Json_JSemantic.Text) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text("&laquo;" + (_1934.value0 + "&raquo;")));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Bool) {
-                        if (_1929.value0) {
+                    if (_1934 instanceof Data_Json_JSemantic.Bool) {
+                        if (_1934.value0) {
                             return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("background:#cfc; text-align:center"))(Text_Smolder_Markup.text("\u2714"));
                         };
-                        if (!_1929.value0) {
+                        if (!_1934.value0) {
                             return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("background:#fcc; text-align:center"))(Text_Smolder_Markup.text("\u274c"));
                         };
                         throw new Error("Failed pattern match");
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Percent) {
+                    if (_1934 instanceof Data_Json_JSemantic.Percent) {
                         return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("text-align: right"))((function () {
-                            var _1944 = Prelude.compare(Prelude.ordNumber)(_1929.value0)(0);
-                            if (_1944 instanceof Prelude.LT) {
-                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#a00"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0) + "% \u25be"));
+                            var _1949 = Prelude.compare(Prelude.ordNumber)(_1934.value0)(0);
+                            if (_1949 instanceof Prelude.LT) {
+                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#a00"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0) + "% \u25be"));
                             };
-                            if (_1944 instanceof Prelude.EQ) {
-                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#000"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0) + "% \u25c2"));
+                            if (_1949 instanceof Prelude.EQ) {
+                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#000"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0) + "% \u25c2"));
                             };
-                            if (_1944 instanceof Prelude.GT) {
-                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#0a0"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0) + "% \u25b4"));
+                            if (_1949 instanceof Prelude.GT) {
+                                return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.span)(Text_Smolder_HTML_Attributes.style("color:#0a0"))(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0) + "% \u25b4"));
                             };
                             throw new Error("Failed pattern match");
                         })());
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.Currency) {
-                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1929.value0)));
+                    if (_1934 instanceof Data_Json_JSemantic.Currency) {
+                        return Text_Smolder_HTML.td(Text_Smolder_Markup.text(Prelude.show(Prelude.showNumber)(_1934.value0)));
                     };
-                    if (_1929 instanceof Data_Json_JSemantic.NA) {
+                    if (_1934 instanceof Data_Json_JSemantic.NA) {
                         return Text_Smolder_Markup["!"](Text_Smolder_Markup.attributableMarkupMF)(Text_Smolder_HTML.td)(Text_Smolder_HTML_Attributes.style("background:#ddd"))(Text_Smolder_Markup.text("&nbsp;"));
                     };
                     throw new Error("Failed pattern match");
                 };
             };
-            return _1947;
+            return _1952;
         })();
-        return _1949;
+        return _1954;
     })());
     var exHomoTupSize = Data_Json_JTable.renderJTable((function () {
-        var _1951 = {};
-        for (var _1952 in Data_Json_JTable.jTableOptsDefault) {
-            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1952)) {
-                _1951[_1952] = Data_Json_JTable.jTableOptsDefault[_1952];
+        var _1956 = {};
+        for (var _1957 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1957)) {
+                _1956[_1957] = Data_Json_JTable.jTableOptsDefault[_1957];
             };
         };
-        _1951.maxHomoTupSize = 5;
-        return _1951;
+        _1956.maxHomoTupSize = 5;
+        return _1956;
     })());
     var exDefault = Data_Json_JTable.renderJTableDef;
     var exDebug = Data_Json_JTable.renderJTable((function () {
-        var _1953 = {};
-        for (var _1954 in Data_Json_JTable.jTableOptsDefault) {
-            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1954)) {
-                _1953[_1954] = Data_Json_JTable.jTableOptsDefault[_1954];
+        var _1958 = {};
+        for (var _1959 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1959)) {
+                _1958[_1959] = Data_Json_JTable.jTableOptsDefault[_1959];
             };
         };
-        _1953.style = Data_Json_JTable.debugStyle;
-        return _1953;
+        _1958.style = Data_Json_JTable.debugStyle;
+        return _1958;
     })());
     var exAltHeader = Data_Json_JTable.renderJTable((function () {
-        var _1955 = {};
-        for (var _1956 in Data_Json_JTable.jTableOptsDefault) {
-            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1956)) {
-                _1955[_1956] = Data_Json_JTable.jTableOptsDefault[_1956];
+        var _1960 = {};
+        for (var _1961 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1961)) {
+                _1960[_1961] = Data_Json_JTable.jTableOptsDefault[_1961];
             };
         };
-        _1955.insertHeaderCells = true;
-        return _1955;
+        _1960.insertHeaderCells = true;
+        return _1960;
     })());
     var exAlphaColumnOrd = Data_Json_JTable.renderJTable((function () {
-        var _1957 = {};
-        for (var _1958 in Data_Json_JTable.jTableOptsDefault) {
-            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1958)) {
-                _1957[_1958] = Data_Json_JTable.jTableOptsDefault[_1958];
+        var _1962 = {};
+        for (var _1963 in Data_Json_JTable.jTableOptsDefault) {
+            if (Data_Json_JTable.jTableOptsDefault.hasOwnProperty(_1963)) {
+                _1962[_1963] = Data_Json_JTable.jTableOptsDefault[_1963];
             };
         };
-        _1957.columnOrdering = Data_Json_JTable.alphaOrdering;
-        return _1957;
+        _1962.columnOrdering = Data_Json_JTable.alphaOrdering;
+        return _1962;
     })());
     var exRenderers = [ exDefault, exDebug, exSemantic, exAlphaColumnOrd, exAltHeader, exHomoTupSize ];
     var getInput = function __do() {
@@ -5159,9 +5162,9 @@ PS.Data_Json_JTable_Examples = (function () {
             return function __do() {
                 var _74 = getNumberValue("select_renderer")();
                 return Prelude[">>="](Data_Either.bindEither)(j)(function (json) {
-                    var _1961 = Data_Array["!!"](exRenderers)(_74);
-                    if (_1961 instanceof Data_Maybe.Just) {
-                        return Data_Either.Right.create(new Data_Tuple.Tuple(_1961.value0, json));
+                    var _1966 = Data_Array["!!"](exRenderers)(_74);
+                    if (_1966 instanceof Data_Maybe.Just) {
+                        return Data_Either.Right.create(new Data_Tuple.Tuple(_1966.value0, json));
                     };
                     return new Data_Either.Left("Invalid Renderer");
                 });

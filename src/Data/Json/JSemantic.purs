@@ -104,7 +104,9 @@ s2n = _s2n Just Nothing
 
 parseX :: forall a. Regex -> (String -> Maybe a) -> (a -> JSemantic) -> String -> Maybe JSemantic
 parseX regexp parser constr s = 
-  match regexp s >>= tail >>= head >>= \s -> constr <$> parser s
+  case match regexp s of
+    Just (_ : s1 : _) -> constr <$> parser s1
+    _                 -> Nothing
 
 parsePercent  r = parseX r s2n Percent
 parseCurrency r = parseX r (replace (rg ",") "" >>> s2n) Currency
