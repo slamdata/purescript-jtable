@@ -20,11 +20,13 @@
   <select id="select_example">
     <option value="simple">Simple</option>
     <option value="comprehensive">Comprehensive</option>
-    <option value="readme">Example from Readme</option>
+    <option value="1">Example 1</option>
+    <option value="2">Example 2</option>
+    <option value="3">Example 3</option>
+    <option value="4">Example 4</option>
+    <option value="5">Example 5</option>
+    <option value="6">Example 6</option>
     <option value="olympic">Olympic Games</option>
-    <option value="1">other 1</option>
-    <option value="2">other 2</option>
-    <option value="3">other 3</option>
   </select>
   &nbsp;
   or 
@@ -230,7 +232,7 @@
 }
 ]
 </pre>
-<pre id="example-readme">{
+<pre id="example-1">{
   "userId": 8927524,
   "profile": {
     "name":   "Mary Jane",
@@ -249,6 +251,93 @@
   }]
 }
 </pre>
+
+<pre id="example-2">[
+{
+ "voter": "Smith",
+ "preferences": [{"id": 123891, "label": "How to draw"}, {"id": 981234, "label": "How to climb stairs"}, {"id": 89231, "label": "How to paint"}]
+},
+{
+ "voter": "Mary",
+ "preferences": [{"id": 981234, "label": "How to climb stairs"}, {"id": 89231, "label": "How to paint"}, {"id": 123891, "label": "How to draw"}]
+},
+{
+ "voter": "Allen",
+ "preferences": [{"id": 89231, "label": "How to paint"}, {"id": 123891, "label": "How to draw"}, {"id": 981234, "label": "How to climb stairs"}]
+}
+]
+</pre>
+
+<pre id="example-3">[
+{
+ "voter": "Smith",
+ "ranking": [0, 2, 3, 1, 8]
+},
+{
+ "voter": "Mary",
+ "ranking": [1, 8, 3, 0, 2]
+},
+{
+ "voter": "Allen",
+ "ranking": [3, 0, 8, 1, 2]
+}
+]
+</pre>
+
+<pre id="example-4">{
+  "foo"  : "foozle",
+  "bars" : [{
+      "zip" : [5, 3],
+      "zop": null
+    },{
+      "zip":null,
+      "zop":[1, 9, 2]
+  }]
+}
+</pre>
+
+<pre id="example-5">{
+  "foo": "foozle",
+  "bars": [{
+      "zip": 0,
+      "zop": 5
+    },{
+      "zip": 3,
+      "zop": 7
+  }]
+}
+</pre>
+
+<pre id="example-6">[{
+  "foo": "foozle",
+  "bars": [{
+      "zip": 0,
+      "zop": 5
+    },{
+      "zip": 3,
+      "zop": 7
+  }]
+}, {
+  "foo": "chozle",
+  "bars": [{
+      "zip": 7,
+      "zop": 6
+    },{
+      "zip": 0,
+      "zop": 2
+  }]
+}, {
+  "foo": "boggle",
+  "bars": [{
+      "zip": 3,
+      "zop": 8
+    },{
+      "zip": 3,
+      "zop": 8
+  }]
+}]
+</pre>
+
 <!-- source: "https://www.freebase.com/user/dimitrisandreou/views/olympic_games?mql=" -->
 <pre id="example-olympic">
 { 
@@ -1417,57 +1506,7 @@
   }]
 }
 </pre>
-<pre id="example-1">{
-  "foo"  : "foozle",
-  "bars" : [{
-      "zip" : [5, 3],
-      "zop": null
-    },{
-      "zip":null,
-      "zop":[1, 9, 2]
-  }]
-}
-</pre>
-<pre id="example-2">{
-  "foo": "foozle",
-  "bars": [{
-      "zip": 0,
-      "zop": 5
-    },{
-      "zip": 3,
-      "zop": 7
-  }]
-}
-</pre>
-<pre id="example-3">[{
-  "foo": "foozle",
-  "bars": [{
-      "zip": 0,
-      "zop": 5
-    },{
-      "zip": 3,
-      "zop": 7
-  }]
-}, {
-  "foo": "chozle",
-  "bars": [{
-      "zip": 7,
-      "zop": 6
-    },{
-      "zip": 0,
-      "zop": 2
-  }]
-}, {
-  "foo": "boggle",
-  "bars": [{
-      "zip": 3,
-      "zop": 8
-    },{
-      "zip": 3,
-      "zop": 8
-  }]
-}]
-</pre>
+
 </div>
 
 <script src="jtable.js"></script>
