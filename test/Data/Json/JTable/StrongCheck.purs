@@ -1,12 +1,12 @@
 module Test.Data.Json.JTable.StrongCheck where
 
 import Data.Array
-import qualified Data.Array.Unsafe as AU
 import Data.Foldable
 import Data.Maybe
 import Data.Tuple
 import qualified Data.StrMap as SM
 import Debug.Trace
+import Debug.Spy
 
 import qualified Data.Argonaut as A
 import Data.Argonaut.Core (Json(..), jsonNull)
@@ -47,39 +47,32 @@ instance arbJson :: Arbitrary Json where
 
 -- repeat cells with [row|col]span 
 unprojectT :: forall a. (a -> Number) -> (a -> Number) -> [[a]] -> [[a]]
-unprojectT widthFn heightFn rows = if null rows then [] else let
-  rows' = do
-    row <- rows
-    return $ concat $ do 
-      cell <- row
-      return $ do
-        n <- 0 .. (widthFn cell - 1)
-        return $ Tuple cell (heightFn cell)
-  op = \rows nrow -> if null rows then [nrow] else snoc rows $ let
-    row = AU.last rows
-    op' = \(Tuple done rest) (Tuple cell h) ->
-      if h > 1 
-      then Tuple (snoc done (Tuple cell (h-1))) rest
-      else Tuple (snoc done (AU.head rest)) (AU.tail (snoc rest (Tuple cell 0)))
-    in case foldl op' (Tuple [] nrow) row of (Tuple done _) -> done
-  rows'' = foldl op [] rows'
-  in rows'' <#> \row -> row <#> \(Tuple cell h) -> cell
+unprojectT widthFn heightFn rows = 
+  fromMaybe [] $ head rows <#> \_-> let
+    rows' = rows <#> (>>= \cell -> (0..(widthFn cell - 1)) <#> \_->
+      Tuple cell (heightFn cell))
+    op = \rs nrow -> snoc rs $ fromMaybe nrow $ last rs <#> \r -> let
+      op' = \(Tuple done rest) (Tuple cell h) ->
+        if h > 1 
+        then Tuple (snoc done (Tuple cell (h-1))) rest
+        else case rest of (c : cs) -> Tuple (snoc done c) cs
+                          _        -> Tuple (snoc done $ Tuple cell 0) []
+      in fst $ foldl op' (Tuple [] nrow) r 
+    in (foldl op [] rows') <#> (<#> fst)
 
 unprojectTreeT = unprojectT tWidth tHeight
 unprojectCellT = unprojectT cWidth cHeight
 
 -- check that all rows are the same length
 isRectangularT :: forall a. [[a]] -> Boolean
-isRectangularT t = (null t) || (all ((==) $ length $ AU.head t) (t <#> length))
-
+isRectangularT t = (length $ nub $ t <#> length) <= 1
 
 -- check that thead and tbody are the same width (or 0)
 lengthsOkT :: forall a b. [[a]] -> [[b]] -> Boolean
 lengthsOkT t1 t2 = 
-  (null t1) || (null t2) || (
-    (not $ null t1) && (not $ null t2) && (
-      (null $ AU.head t1) || (null $ AU.head t2)) || (
-      (length $ AU.head t1) == (length $ AU.head t2) ))
+  fromMaybe (null t1 || null t2) $ 
+    head t1 >>= \ht1 -> head t2 <#> \ht2 ->
+      (null ht1) || (null ht2) || (length ht1) == (length ht2)
 
 -- check table invariants
 checkTable :: Json -> Result
@@ -89,7 +82,7 @@ checkTable json = let
   drs = cFromJson 2 t JCursorTop json
   uhrs = unprojectTreeT $ hrs
   udrs = unprojectCellT $ drs
-  in isRectangularT uhrs && isRectangularT udrs && 
+  in (isRectangularT uhrs) && (isRectangularT udrs) && 
      (lengthsOkT uhrs udrs) <?> show json 
 
 
@@ -105,8 +98,9 @@ barf json = let
     H.thead $ renderRows H.tr th' $ unprojectTreeT hrs
     H.tbody $ renderRows H.tr td' $ unprojectCellT drs
 
--- foreign import j0 """var j0 = null""" :: Json
+-- foreign import j """var j = null""" :: Json
 
 main = do
   quickCheck checkTable
-  -- trace $ barf j0
+  -- print $ checkTable j
+  -- trace $ barf j
