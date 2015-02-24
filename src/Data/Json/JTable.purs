@@ -8,7 +8,6 @@ module Data.Json.JTable
 import Data.Json.JTable.Internal
 
 import Data.String (joinWith)
-import qualified Data.Array.Unsafe as AU
 import Data.Argonaut.Core
 import Data.Argonaut.JCursor
 import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, small)
@@ -21,7 +20,7 @@ import Data.Foldable (mconcat)
 type TableStyle = {
   table :: Markup -> Markup,
   tr    :: Markup -> Markup ,
-  th    :: JPath -> Markup,
+  th    :: String -> JPath -> Markup,
   td    :: JCursor -> JsonPrim -> Markup }
 
 renderJsonSimple j = runJsonPrim j (const "&nbsp;") show show id
@@ -29,7 +28,7 @@ renderJsonSimple j = runJsonPrim j (const "&nbsp;") show show id
 noStyle = {
   table: table, 
   tr: tr, 
-  th: \p -> th $ text $ AU.last p,
+  th: \l p -> th $ text l,
   td: \c j -> td $ text $ renderJsonSimple j
     
 } :: TableStyle
@@ -38,16 +37,16 @@ bootstrapStyle = (noStyle {
   table = \m -> table ! attribute "class" "table" $ m}) :: TableStyle
 
 debugStyle = (noStyle {
-  th = (\p -> th $ text $ joinWith "." p),
+  th = (\l p -> th $ text $ joinWith "." p),
   td = (\c j -> td $ mconcat $
     [(small ! className "grey" $ text $ show c), (br), (text $ show j)]
 )}::TableStyle)
 
 
-type ColumnOrdering = JPath -> JPath -> Ordering
+type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
 
-inOrdering = (\p1 p2 -> EQ) :: ColumnOrdering
-alphaOrdering = (\p1 p2 -> strcmp (AU.last p1) (AU.last p2)) :: ColumnOrdering
+inOrdering = (\l1 p1 l2 p2 -> EQ) :: ColumnOrdering
+alphaOrdering = (\l1 p1 l2 p2 -> strcmp l1 l2) :: ColumnOrdering
 
 
 type JTableOpts = {
@@ -66,8 +65,8 @@ jTableOptsDefault  = {
 
 renderJTable :: JTableOpts -> Json -> Markup
 renderJTable o = renderJTableRaw o { style = o.style {
-  th = (\t -> o.style.th (t # tPath)),
-  td = (\c -> o.style.td (c # cCursor) (c # cJsonPrim)) }}
+  th = (\(T l p _ _ _) -> o.style.th l p),
+  td = (\(C c _ _ j) -> o.style.td c j) }}
 
 renderJTableDef :: Json -> Markup
 renderJTableDef = renderJTable jTableOptsDefault

@@ -84,7 +84,7 @@ lengthsOkT t1 t2 =
 -- check table invariants
 checkTable :: Json -> Result
 checkTable json = let
-  t = tFromJson 2 [] json
+  t = tFromJson 2 "" [] json
   hrs = tsToRows (t # tKids)
   drs = cFromJson 2 t JCursorTop json
   uhrs = unprojectTreeT $ hrs
@@ -96,11 +96,11 @@ checkTable json = let
 -- print unprojected html for debugging
 barf :: Json -> String
 barf json = let 
-  t = tFromJson 2 [] json
+  t = tFromJson 2 "" [] json
   hrs = tsToRows (t # tKids)
   drs = cFromJson 2 t JCursorTop json
-  th' = \y x (T p w h k) -> H.th $ text $ show $ AU.last p
-  td' = \y x (C c w h j) -> H.td $ text $ show j
+  th' = \y x (T l p w h k) -> H.th $ text $ show l
+  td' = \y x   (C c w h j) -> H.td $ text $ show j
   in Sm.render $ H.table $ do 
     H.thead $ renderRows H.tr th' $ unprojectTreeT hrs
     H.tbody $ renderRows H.tr td' $ unprojectCellT drs

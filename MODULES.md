@@ -2,160 +2,239 @@
 
 ## Module Data.Json.JTable
 
-### Types
+#### `TableStyle`
+
+``` purescript
+type TableStyle = { td :: JCursor -> JsonPrim -> Markup, th :: String -> JPath -> Markup, tr :: Markup -> Markup, table :: Markup -> Markup }
+```
+
+#### `ColumnOrdering`
+
+``` purescript
+type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
+```
 
 
-    type ColumnOrdering = JPath -> JPath -> Ordering
+#### `JTableOpts`
+
+``` purescript
+type JTableOpts = { maxHomoTupSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
+```
 
 
-    type JTableOpts = { maxHomoTupSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
+#### `renderJTable`
 
-     type JPath = [String]
-
-    type TableStyle = { td :: JCursor -> JsonPrim -> Markup, th :: JPath -> Markup, tr :: Markup -> Markup, table :: Markup -> Markup }
-
-
-### Values
+``` purescript
+renderJTable :: JTableOpts -> Json -> Markup
+```
 
 
-    renderJTable :: JTableOpts -> Json -> Markup
+#### `renderJTableDef`
 
+``` purescript
+renderJTableDef :: Json -> Markup
+```
 
-    renderJTableDef :: Json -> Markup
 
 
 ## Module Data.Json.JTable.Internal
 
-### Types
+#### `JPath`
 
-     cell data
+``` purescript
+type JPath = [String]
+```
 
-    data Cell where
-      C :: JCursor -> Number -> Number -> JsonPrim -> Cell
+#### `Table`
 
-     path of object keys, with array indices omitted
+``` purescript
+type Table = [[Cell]]
+```
 
-    type JPath = [String]
+#### `Tree`
 
-     rows of cells
+``` purescript
+data Tree
+  = T String JPath Number Number [Tree]
+```
 
-    type Table = [[Cell]]
+#### `showTree`
 
-     header data
-
-    data Tree where
-      T :: JPath -> Number -> Number -> [Tree] -> Tree
-
-
-### Type Class Instances
-
-
-    instance showCell :: Show Cell
-
-
-    instance showTree :: Show Tree
+``` purescript
+instance showTree :: Show Tree
+```
 
 
-### Values
+#### `Cell`
+
+``` purescript
+data Cell
+  = C JCursor Number Number JsonPrim
+```
+
+#### `showCell`
+
+``` purescript
+instance showCell :: Show Cell
+```
 
 
-    _nattr :: String -> Number -> Markup -> Markup
+#### `foldJsonP`
 
-     produce data table from json, according to header tree
-
-    cFromJson :: Number -> Tree -> JCursor -> Json -> Table
-
-     merge table segments for each key of an object into one
-
-    cMergeObj :: [Tuple Number Table] -> Table
+``` purescript
+foldJsonP :: forall a. (JsonPrim -> a) -> (JArray -> a) -> (JObject -> a) -> Json -> a
+```
 
 
-    foldJsonP :: forall a. (JsonPrim -> a) -> (JArray -> a) -> (JObject -> a) -> Json -> a
+#### `toPrim`
 
-     pad tall header cells from above
-
-    insertHeaderCells :: Number -> Tree -> Tree
-
-     maybe merge a tuple of objects into a table segment
-
-    mergeObjTuple :: Number -> Tree -> JCursor -> [Json] -> Maybe Table
-
-     render a grid from an array of arrays
-
-    renderRows :: forall a. (Markup -> Markup) -> (Number -> Number -> a -> Markup) -> [[a]] -> Markup
+``` purescript
+toPrim :: Json -> Maybe JsonPrim
+```
 
 
-    renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Table -> Markup
+#### `widthOfPrimTuple`
+
+``` purescript
+widthOfPrimTuple :: Number -> JPath -> [Json] -> Maybe Number
+```
+
+#### `tMergeArray`
+
+``` purescript
+tMergeArray :: Tree -> Tree -> Tree
+```
+
+#### `tFromJson`
+
+``` purescript
+tFromJson :: Number -> String -> JPath -> Json -> Tree
+```
+
+#### `cMergeObj`
+
+``` purescript
+cMergeObj :: [Tuple Number Table] -> Table
+```
+
+#### `mergeObjTuple`
+
+``` purescript
+mergeObjTuple :: Number -> Tree -> JCursor -> [Json] -> Maybe Table
+```
+
+#### `cFromJson`
+
+``` purescript
+cFromJson :: Number -> Tree -> JCursor -> Json -> Table
+```
+
+#### `renderRows`
+
+``` purescript
+renderRows :: forall a. (Markup -> Markup) -> (Number -> Number -> a -> Markup) -> [[a]] -> Markup
+```
+
+#### `_nattr`
+
+``` purescript
+_nattr :: String -> Number -> Markup -> Markup
+```
 
 
-    renderThead :: (Markup -> Markup) -> (Tree -> Markup) -> Tree -> Markup
+#### `tsToRows`
 
-     sort header tree by ColumnOrdering
+``` purescript
+tsToRows :: [Tree] -> [[Tree]]
+```
 
-    sortTree :: (JPath -> JPath -> Ordering) -> Tree -> Tree
+#### `renderThead`
 
-
-    strcmp :: String -> String -> Ordering
-
-     produce a tree of header data from json
-
-    tFromJson :: Number -> JPath -> Json -> Tree
-
-     add child to tree, unify if exists
-
-    tMergeArray :: Tree -> Tree -> Tree
+``` purescript
+renderThead :: (Markup -> Markup) -> (Tree -> Markup) -> Tree -> Markup
+```
 
 
-    toPrim :: Json -> Maybe JsonPrim
+#### `renderTbody`
 
-     produce header rows from header tree
+``` purescript
+renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Table -> Markup
+```
 
-    tsToRows :: [Tree] -> [[Tree]]
 
-     maybe return the width of a tuple composed of primitive values
+#### `sortTree`
 
-    widthOfPrimTuple :: Number -> JPath -> [Json] -> Maybe Number
+``` purescript
+sortTree :: (String -> JPath -> String -> JPath -> Ordering) -> Tree -> Tree
+```
+
+#### `strcmp`
+
+``` purescript
+strcmp :: String -> String -> Ordering
+```
+
+
+#### `padTree`
+
+``` purescript
+padTree :: Number -> Tree -> Tree
+```
 
 
 ## Module Data.Json.JSemantic
 
-### Types
+#### `JSemantic`
+
+``` purescript
+data JSemantic
+  = Integral Number
+  | Fractional Number
+  | Date Date.Date
+  | DateTime Date.Date
+  | Time Date.Date
+  | Interval Date.Date Date.Date
+  | Text String
+  | Bool Boolean
+  | Percent Number
+  | Currency Number
+  | NA 
+```
 
 
-    data JSemantic where
-      Integral :: Number -> JSemantic
-      Fractional :: Number -> JSemantic
-      Date :: Date.Date -> JSemantic
-      DateTime :: Date.Date -> JSemantic
-      Time :: Date.Date -> JSemantic
-      Interval :: Date.Date -> Date.Date -> JSemantic
-      Text :: String -> JSemantic
-      Bool :: Boolean -> JSemantic
-      Percent :: Number -> JSemantic
-      Currency :: Number -> JSemantic
-      NA :: JSemantic
+#### `showJSemantic`
+
+``` purescript
+instance showJSemantic :: Show JSemantic
+```
 
 
-    type JSemanticOpts = { regexps :: { date :: Regex, currency :: Regex, percent :: Regex } }
+#### `eqJSemantic`
+
+``` purescript
+instance eqJSemantic :: Eq JSemantic
+```
 
 
-### Type Class Instances
+#### `JSemanticOpts`
+
+``` purescript
+type JSemanticOpts = { regexps :: { date :: Regex, currency :: Regex, percent :: Regex } }
+```
 
 
-    instance eqJSemantic :: Eq JSemantic
+#### `toSemantic`
 
+``` purescript
+toSemantic :: JSemanticOpts -> JsonPrim -> JSemantic
+```
 
-    instance showJSemantic :: Show JSemantic
+#### `toSemanticDef`
 
+``` purescript
+toSemanticDef :: JsonPrim -> JSemantic
+```
 
-### Values
-
-     TODO: date, time
-
-    toSemantic :: JSemanticOpts -> JsonPrim -> JSemantic
-
-
-    toSemanticDef :: JsonPrim -> JSemantic
 
 
 
