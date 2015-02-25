@@ -3889,7 +3889,7 @@ PS.Data_Json_JTable_Internal = (function () {
      */
     var cMergeObj = function (rss) {
         var maxh = Data_Foldable.foldl(Data_Foldable.foldableArray)($$Math.max)(0)(Prelude["<#>"](Data_Array.functorArray)(Prelude["<#>"](Data_Array.functorArray)(rss)(Data_Tuple.snd))(Data_Array.length));
-        return Prelude["<#>"](Data_Array.functorArray)(Data_Array[".."](0)(maxh - 1))(function (n) {
+        return Prelude["<#>"](Data_Array.functorArray)(Data_Array.range(0)($$Math.max(0)(maxh - 1)))(function (n) {
             return Prelude[">>="](Data_Array.bindArray)(rss)(Data_Tuple.uncurry(function (w) {
                 return function (rs) {
                     var rnOr = function (_1) {

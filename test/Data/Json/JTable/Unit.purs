@@ -25,6 +25,7 @@ foreign import jAHomoTup2 "var jAHomoTup2 = jHomoTup2" :: [Json]
 foreign import jArr3  "var jArr3 = [true, false, true]" :: Json
 foreign import jAArr3 "var jAArr3 = jArr3" :: [Json]
 foreign import jObj2 "var jObj2 = {a:1, b:'two'}" :: Json
+foreign import jObjArr0 "var jObjArr0 = {a:[]}" :: Json
 foreign import jObj2Tup2 "var jObj2Tup2 = {a:1, b:['one', false]}" :: Json
 foreign import jObj2Obj2 "var jObj2Obj2 = {a:1, b: {b1: 'one', b2: false}}" :: Json
 foreign import jObjArr2Tup2 "var jObjArr2Tup2 = {a:[[1, 'two'], [3, 'four']]}" :: Json
@@ -93,6 +94,8 @@ main = do
     tf "jObjWeird" jObjWeird $ "<table><thead><tr><th colspan=\"2\">a</th><th rowspan=\"2\">b</th></tr><tr><th>x</th><th>y</th></tr></thead><tbody><tr><td>1</td><td>&nbsp;</td><td>1</td></tr><tr><td>2</td><td>&nbsp;</td><td>2</td></tr><tr><td>3</td><td>&nbsp;</td><td>3</td></tr><tr><td>4</td><td>&nbsp;</td><td>4</td></tr><tr><td colspan=\"2\">&nbsp;</td><td>5</td></tr></tbody></table>"
     tf "jArrObj2Tups" jArrObj2Tups $ 
       "<table><thead><tr><th colspan=\"3\">a</th><th colspan=\"3\">b</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>1</td><td>1</td><td>2</td><td>&nbsp;</td></tr><tr><td colspan=\"3\">&nbsp;</td><td>3</td><td>2</td><td>1</td></tr></tbody></table>"
+    tf "jObjArr0" jObjArr0 $ 
+      "<table><thead><tr><th>a</th></tr></thead><tbody><tr><td>&nbsp;</td></tr></tbody></table>"
 
   test "insertHeaderCells" do
     let o = jTableOptsDefault {insertHeaderCells = true}

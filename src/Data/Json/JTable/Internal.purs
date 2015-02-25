@@ -14,7 +14,7 @@ import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Tuple (Tuple(..), fst, snd, uncurry, zip)
 import Data.String (joinWith, localeCompare)
 import Data.Array (head, tail, length, null, singleton, snoc, concat, 
-                   sortBy, nub, findIndex, updateAt, (!!), (..))
+                   sortBy, nub, findIndex, updateAt, range, (..), (!!))
 import qualified Data.StrMap as M
 import Data.Foldable (foldl, any, all, mconcat, elem)
 import Data.Traversable (for)
@@ -118,12 +118,11 @@ tFromJson hS label path = let
          in T label path w h k
   in foldJsonP prim (tuple `orelse` array) obj
 
-
 -- merge table segments for each key of an object into one
 cMergeObj :: [(Tuple Number Table)] -> Table
 cMergeObj rss = let
   maxh = rss <#> snd <#> length # foldl max 0
-  in (0 .. (maxh - 1)) <#> \n -> rss >>= uncurry \w rs -> let
+  in (range 0 $ max 0 $ maxh - 1) <#> \n -> rss >>= uncurry \w rs -> let
     rnOr = (`fromMaybe` (rs !! n))
     in case rs of (r : []) -> if n == 0 then r <#> \(C c w h j) -> C c w maxh j
                                         else rnOr [] 
