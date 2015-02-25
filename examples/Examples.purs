@@ -1,10 +1,12 @@
 module Data.Json.JTable.Examples where
 
 import Data.String (split)
-import Data.Array (length, head, tail, (!!))
+import Data.Array (length, head, tail, filter, (!!))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..), fst)
 import Data.Either (Either(..))
+import Data.Foreign (Foreign(..), F(..), readString, readNumber)
+import Data.Foreign.Class (IsForeign)
 import Data.Argonaut.Core (Json(..))
 import Data.Argonaut.JCursor (primToJson, primNull)
 import Data.Argonaut.Parser (jsonParser)
@@ -14,10 +16,11 @@ import Text.Smolder.Markup (Markup(..), (!), text)
 import qualified Text.Smolder.Renderer.String as SmR
 import Test.StrongCheck.Gen (GenState(..), runGen)
 import Control.Monad.Eff (Eff(..))
-import Control.Monad.Eff.Random (random)
+import Control.Monad.Eff.Random (Random(..), random)
 import Control.Monad.Trampoline (runTrampoline)
 import Control.Bind ((<=<))
 import Control.Timer (Timer(..))
+import qualified Control.Monad.JQuery as J
 import DOM (DOM(..))
 import Debug.Spy (spy)
 
@@ -67,95 +70,81 @@ exAltHeader =
 exHomoTupSize = 
   renderJTable jTableOptsDefault {maxHomoTupSize = 5}
 
-exRenderers = [ exDefault
-              , exDebug
-              , exSemantic
-              , exAlphaColumnOrd
-              , exAltHeader
-              , exHomoTupSize 
+exRenderers = [ (Tuple "Default"        exDefault)
+              , (Tuple "Debug"          exDebug)
+              , (Tuple "Semantic"       exSemantic)
+              , (Tuple "AlphaColumnOrd" exAlphaColumnOrd)
+              , (Tuple "AltHeader"      exAltHeader)
+              , (Tuple "HomoTupSize"    exHomoTupSize )
               ]
 
+getInput :: forall eff. Eff (dom::DOM | eff) (Either String (Tuple (Json -> Markup) Json))
 getInput = do
-  s <- getValue "in"
+  (Right s) <- (J.select "#in" >>= J.getValue) <#> readString
+  (Right i) <- (J.select "#select_renderer" >>= J.getValue) <#> readString
   let j = jsonParser s
-  i <- getNumberValue "select_renderer"
-  return $ j >>= \json -> case exRenderers !! i of 
-    Just renderer -> Right $ Tuple renderer json
-    _      -> Left "Invalid Renderer"
+  return $ j >>= \json -> case head $ filter (fst >>> (== i)) exRenderers of 
+    Just (Tuple _ renderer) -> Right $ Tuple renderer json
+    _                       -> Left "Invalid Renderer"
 
-render = 
-  getInput >>= \i -> setHtml "out" case i of 
-    Left e -> e
-    Right (Tuple renderer json) -> SmR.render $ renderer json
+render :: forall eff. Eff (dom::DOM | eff) Unit
+render = do
+  i <- getInput
+  setHtml "#out" case i of Right (Tuple r json) -> SmR.render $ r json
+                           Left e -> e
 
+benchmark :: forall eff. Eff (dom::DOM, timer::Timer | eff) Unit
 benchmark = 
   getInput >>= \i -> case i of 
-    Left e -> setHtml "out" e
+    Left e -> setHtml "#out" e
     Right (Tuple r json) -> do
       ms <- _benchmark r json 
-      setHtml "benchmark" $ (show ms) ++ " ms"
+      setHtml "#benchmark" $ (show ms) ++ " ms"
       render
 
-select_example = do
-  ex <- getValue "select_example"
-  jsonStr <- getHtml ("example-" ++ ex)
-  setValue "in" jsonStr
+selectExample :: forall eff. Eff (dom::DOM | eff) Unit
+selectExample = do
+  (Right ex) <- (J.select "#select_example" >>= J.getValue) <#> readString
+  jsonStr <- J.select ("#example-" ++ ex) >>= J.getText
+  J.select "#in" >>= J.setValue jsonStr
   render
 
-click_random = do
-  jsonStr <- randomJson
-  setValue "in" $ show jsonStr
-  render
-
+randomJson :: forall eff. Eff (random :: Random | eff) Json
 randomJson = do
   i <- random
   let state = GenState {size: 10, seed: i}
   return $ fromMaybe (primToJson primNull) $
     (head <=< tail) $ fst $ runTrampoline $ runGen 2 state genJson
 
-main = do
-  select_example
-  onload do
-    on "change" "select_example" select_example
-    on "change" "select_renderer" render
-    on "click" "but_randomjson"  click_random
-    on "click" "but_render" render
-    on "click" "but_benchmark"  benchmark
-    onCtrlEnter "in" render
+clickRandom :: forall eff. Eff (dom::DOM, random::Random | eff) Unit
+clickRandom = do
+  jsonStr <- randomJson
+  J.select "#in" >>= J.setValue (show jsonStr)
+  render
 
 
--- simple dom access
+setHtml :: forall eff. String -> String -> Eff (dom::DOM | eff) Unit
+setHtml i html = do 
+  el <- J.select i
+  J.clear el
+  h <- J.create ("<span>" ++ html ++ "</span>")
+  J.append h el
+  return unit
+  
 
-foreign import getValue """function getValue (id) { return function () {
-  return document.getElementById(id).value }}
-""" :: forall eff. String -> Eff (dom :: DOM | eff) String
+main = J.ready do
+  selectExample
+  let on i ev cb = J.select i >>= J.on ev \ev _ -> cb
+  on "#select_example"  "change" selectExample
+  on "#select_renderer" "change" render
+  on "#but_randomjson"  "click"  clickRandom
+  on "#but_render"      "click"  render
+  on "#but_benchmark"   "click"  benchmark
+  onCtrlEnter "#in" render
 
-foreign import getNumberValue """function getNumberValue (id) { return function () {
-  return document.getElementById(id).value * 1 }}
-""" :: forall eff. String -> Eff (dom :: DOM | eff) Number
 
-foreign import setValue """function setValue (id) { return function (val) { return function () {
-  return document.getElementById(id).value = val }}}
-""" :: forall eff. String -> String -> Eff (dom :: DOM | eff) String
-
-foreign import getHtml """function getHtml (id) { return function () {
-  return document.getElementById(id).innerHTML }}
-""" :: forall eff. String -> Eff (dom :: DOM | eff) String
-
-foreign import setHtml """function setHtml (id) { return function (html) { return function () {
-  document.getElementById(id).innerHTML = html }}}
-""" :: forall eff. String -> String -> Eff (dom :: DOM | eff) Unit
-
-foreign import on """function on (ev) { return function (id) { return function (cb) { return function () {
-  document.getElementById(id).addEventListener(ev, cb) }}}}
-""" :: forall eff. String -> String -> Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
-
-foreign import onload """function onload (cb) { return function () {
-  window.addEventListener("load", cb) }}
-""" :: forall eff. Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
-
-foreign import onCtrlEnter """function onCtrlEnter (id) { return function (cb) { return function () {
-  on("keydown")(id)(function (e) {
+foreign import onCtrlEnter """function onCtrlEnter (sel) { return function (cb) { return function () {
+  window.jQuery(sel).on("keyup", function (e) {
     if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {cb()} }) }}}
 """ :: forall eff. String -> Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
 
