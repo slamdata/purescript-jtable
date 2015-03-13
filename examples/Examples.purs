@@ -67,15 +67,15 @@ exAlphaColumnOrd =
 exAltHeader = 
   renderJTable jTableOptsDefault {insertHeaderCells = true}
 
-exHomoTupSize = 
-  renderJTable jTableOptsDefault {maxHomoTupSize = 5}
+exMaxTupleSIze = 
+  renderJTable jTableOptsDefault {maxTupleSize = 3}
 
 exRenderers = [ (Tuple "Default"        exDefault)
               , (Tuple "Debug"          exDebug)
               , (Tuple "Semantic"       exSemantic)
               , (Tuple "AlphaColumnOrd" exAlphaColumnOrd)
               , (Tuple "AltHeader"      exAltHeader)
-              , (Tuple "HomoTupSize"    exHomoTupSize )
+              , (Tuple "MaxTupleSize"   exMaxTupleSIze )
               ]
 
 getInput :: forall eff. Eff (dom::DOM | eff) (Either String (Tuple (Json -> Markup) Json))

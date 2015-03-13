@@ -17,27 +17,25 @@
     "gulpfile.js",
     "package.json"
   ],
+  "resolutions": {
+    "purescript-monoid": "~0.2.0",
+    "purescript-maps": "~0.3.0",
+    "purescript-foldable-traversable": "~0.3.0",
+    "purescript-tuples": "~0.3.0",
+    "purescript-identity": "~0.3.0",
+    "purescript-transformers": "~0.5.0"
+  },
   "dependencies": {
     "purescript-smolder": "~2.0.0",
-    "purescript-argonaut": "~0.3.0",
-    "purescript-datetime": "~0.2.0",
-    "purescript-strings": "~0.4.3",
-    "purescript-jquery": "~0.4.0"
+    "purescript-argonaut": "~0.4.0",
+    "purescript-datetime": "~0.3.1",
+    "purescript-strings": "~0.4.3"
   },
   "devDependencies": {
+    "purescript-jquery": "~0.4.0",
     "purescript-debug-foreign": "~0.0.4",
-    "purescript-strongcheck": "~0.7.0",
-    "purescript-random": "jacereda/purescript-random#master",
+    "purescript-strongcheck": "~0.8.0",
     "purescript-test-unit": "~1.1.5",
     "purescript-dom": "~0.1.1"
-  },
-  "resolutions": {
-    "purescript-maps": "~0.2.0",
-    "purescript-random": "master",
-    "purescript-foldable-traversable": "~0.2.1",
-    "purescript-transformers": "~0.4.0",
-    "purescript-identity": "~0.2.0",
-    "purescript-tuples": "~0.3.0",
-    "purescript-monoid": "~0.1.5"
   }
 }

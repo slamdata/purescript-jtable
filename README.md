@@ -1,7 +1,6 @@
 # purescript-jtable
 
-A small but powerful Purescript library to render heterogeneous arrays of JSON into HTML nodes that display multi-dimensional tables. The rendering degrades gracefully for flat data (to ordinary tables).
-
+A small but powerful Purescript library to render arbitrary JSON into HTML tables. 
 
 Turn this:
 
@@ -76,8 +75,8 @@ type JTableOpts = {                 -- rendering options
   style :: TableStyle,              -- override element rendering
   columnOrdering :: ColumnOrdering, -- customize header ordering
   insertHeaderCells :: Boolean,     -- pad tall headers with empty cells above
-  maxHomoTupSize :: Number}         -- maximum size of homogeneous tuples
-
+  maxTupleSize :: Number}           -- arrays of primitives upto this size 
+                                       -- are rendered horizontally as tuples
 jTableOptsDefault :: JTableOpts     -- default options for easy overriding
 
 type JPath = [String]  -- object key hierarchy with array indices omitted

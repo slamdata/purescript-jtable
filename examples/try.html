@@ -42,6 +42,7 @@
     <option value="19">Example 19</option>
     <option value="20">Example 20</option>
     <option value="21">Example 21</option>
+    <option value="22">Example 22</option>
   </select>
   &nbsp;
   or 
@@ -58,7 +59,7 @@
     <option value="Semantic" selected>Semantic</option>
     <option value="AlphaColumnOrd">Alphabetic Column Ordering</option>
     <option value="AltHeader">Alternate Header</option>
-    <option value="HomoTupSize">Homogeneous Tuples Width 5</option>
+    <option value="MaxTupleSize">maxTupleSize = 3</option>
   </select>
   &nbsp;
   see <a href="Examples.purs" target="_blank">Examples.purs</a>
@@ -150,12 +151,12 @@
       "right" : [{
           "sub": {
             "a": "item 2.1",
-            "b": [1, 2, 3]
+            "b": 123
           }
         }, {
           "sub": {
             "a": "item 2.2",
-            "b": ["a", "b", "c"]
+            "b": "abc"
           }
         }
       ]
@@ -209,7 +210,7 @@
       ]
     }
   },
-  "notes": "Tuples (heterogenous lists) are rendered side by side if they are in the deepest nesting. They can be in a list."
+  "notes": "Tuples (lists of primitives with length < maxTupleSize) are rendered side by side if they are in the deepest nesting. They can be in a list."
 }, {
   "example": [
     {
@@ -218,14 +219,7 @@
       "right": 2
     }
   ],
-  "notes": "A tuple (list) of objects with disjunct keys is rendered side-by-side."
-}, {
-  "example": {
-    "left": {
-      "x": [47.492, 19.752]
-    }
-  },
-  "notes": "Two element lists are also tuples. Handy for latlng and such."
+  "notes": "A tuple of objects (list of objects with disjunct keys) is rendered side-by-side."
 }, {
   "example": {
     "left" : [
@@ -460,6 +454,23 @@
   "foo": [1, 2, 3],
   "bar": [1, 2, 3, null, 5, 6]
 }
+</pre>
+
+<pre id="example-22">[
+  {
+    "a": {
+      "x": 0
+    },
+    "b": 8
+  },
+  {
+    "a": [
+      1,
+      2
+    ],
+    "b": 9
+  }
+]
 </pre>
 
 

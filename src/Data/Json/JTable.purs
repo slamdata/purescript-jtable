@@ -53,13 +53,13 @@ type JTableOpts = {
   style :: TableStyle,
   columnOrdering :: ColumnOrdering,
   insertHeaderCells :: Boolean,
-  maxHomoTupSize :: Number }
+  maxTupleSize :: Number }
 
 jTableOptsDefault  = {
   style: noStyle,
   columnOrdering: inOrdering,
   insertHeaderCells: false,
-  maxHomoTupSize: 3
+  maxTupleSize: 10
 } :: JTableOpts
 
 

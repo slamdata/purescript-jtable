@@ -34,18 +34,19 @@ foreign import jObjTup2Obj "var jObjTup2Obj = {a:[{x:1}, {y:2}]}" :: Json
 foreign import jObj2EArr "var jObj2EArr = {a:[], b:'one'}" :: Json
 foreign import jObjWeird "var jObjWeird = {a:{x:[1,2,3,4], y:[]}, b:[1,2,3,4,5]}" :: Json
 foreign import jArrObj2Tups "var jArrObj2Tups = [{a:[3,2,1],b:[1,2]},{a:null,b:[3,2,1]}]" :: Json
+foreign import jMergeObjTup "var jMergeObjTup = [{a:{x:0}, b:8}, {a: [1,2], b:9}]" :: Json
 
 
 main = do
   test "widthOfPrimTuple" do
-    let tf s t j r = assert s $ widthOfPrimTuple 2 t j == r
+    let tf s t j r = assert s $ (widthOfPrimTuple 2 t j) == r
     tf "top null" [] [jNull] Nothing
     tf "top jATup2" [] jATup2 Nothing
     tf "top jATup3" [] jATup3 Nothing
     tf "null" [""] [jNull] Nothing
     tf "0" [""] [j0] Nothing
     tf "jATup2" [""] jATup2 $ Just 2
-    tf "jATup3" [""] jATup3 $ Just 3
+    tf "jATup3" [""] jATup3 $ Nothing
     tf "jAHomoTup2" [""] jAHomoTup2 $ Just 2
     tf "jAArr3" [""] jAArr3 Nothing
     tf "tup 0 arr" [""] [j0, jTup2] Nothing
@@ -91,11 +92,14 @@ main = do
     tf "jObj2EArr" jObj2EArr $ 
       "<table><thead><tr><th>a</th><th>b</th></tr></thead>" ++ 
       "<tbody><tr><td>&nbsp;</td><td>one</td></tr></tbody></table>"
-    tf "jObjWeird" jObjWeird $ "<table><thead><tr><th colspan=\"2\">a</th><th rowspan=\"2\">b</th></tr><tr><th>x</th><th>y</th></tr></thead><tbody><tr><td>1</td><td>&nbsp;</td><td>1</td></tr><tr><td>2</td><td>&nbsp;</td><td>2</td></tr><tr><td>3</td><td>&nbsp;</td><td>3</td></tr><tr><td>4</td><td>&nbsp;</td><td>4</td></tr><tr><td colspan=\"2\">&nbsp;</td><td>5</td></tr></tbody></table>"
+    tf "jObjWeird" jObjWeird $ 
+      "<table><thead><tr><th colspan=\"5\">a</th><th colspan=\"5\" rowspan=\"2\">b</th></tr><tr><th colspan=\"4\">x</th><th>y</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>&nbsp;</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr></tbody></table>"
     tf "jArrObj2Tups" jArrObj2Tups $ 
       "<table><thead><tr><th colspan=\"3\">a</th><th colspan=\"3\">b</th></tr></thead><tbody><tr><td>3</td><td>2</td><td>1</td><td>1</td><td>2</td><td>&nbsp;</td></tr><tr><td colspan=\"3\">&nbsp;</td><td>3</td><td>2</td><td>1</td></tr></tbody></table>"
     tf "jObjArr0" jObjArr0 $ 
       "<table><thead><tr><th>a</th></tr></thead><tbody><tr><td>&nbsp;</td></tr></tbody></table>"
+    tf "jMergeObjTup" jMergeObjTup $ 
+      "<table><thead><tr><th>a</th><th rowspan=\"2\">b</th></tr><tr><th>x</th></tr></thead><tbody><tr><td>0</td><td>8</td></tr><tr><td>1</td><td rowspan=\"2\">9</td></tr><tr><td>2</td></tr></tbody></table>"
 
   test "insertHeaderCells" do
     let o = jTableOptsDefault {insertHeaderCells = true}
