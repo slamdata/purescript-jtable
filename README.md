@@ -66,6 +66,8 @@ See the [Try it!](http://rawgit.com/brainrape/purescript-jtable/dev-squash/examp
 
 ### API
 
+See [MODULES.md](MODULES.md).
+
 ```purescript
 -- rendering functions
 renderJTable      :: JTableOpts -> Json -> Markup    -- main renderer

@@ -18,7 +18,7 @@ type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
 #### `JTableOpts`
 
 ``` purescript
-type JTableOpts = { maxHomoTupSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
+type JTableOpts = { maxTupleSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
 ```
 
 
@@ -97,13 +97,6 @@ toPrim :: Json -> Maybe JsonPrim
 
 ``` purescript
 zipWithIndex :: forall a. [a] -> [Tuple a Number]
-```
-
-
-#### `orelse`
-
-``` purescript
-orelse :: forall a b. (a -> Maybe b) -> (a -> b) -> a -> b
 ```
 
 
