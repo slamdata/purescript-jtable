@@ -18,11 +18,14 @@ var paths = {
         'all': {
             dest: 'MODULES.md',
             src: [
-              'src/**/*.purs'
+              'src/Data/Json/JTable.purs',
+              'src/Data/Json/JTable/Internal.purs',
+              'src/Data/Json/JSemantic.purs',
+              'src/Data/Json/Gen.purs'
             ]
         }
     },
-    exampleSrc: 'example/Main.purs',
+    exampleSrc: 'examples/Examples.purs',
     test: 'test/**/*.purs'
 };
 
@@ -65,8 +68,12 @@ function sequence () {
 }
 
 gulp.task('browser', function() {
-    return compile(purescript.psc, [paths.src].concat(paths.bowerSrc), {})
-        .pipe(gulp.dest('example'))
+    return compile(purescript.psc, [paths.exampleSrc, paths.src].concat(paths.bowerSrc), {
+            output: 'jtable.js', 
+            main:'Data.Json.JTable.Examples',
+            modules: ['Data.Json.JTable.Examples', 'Data.Json.JTable']
+        })
+        .pipe(gulp.dest('examples'))
 });
 
 gulp.task('make', function() {
