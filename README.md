@@ -39,7 +39,7 @@ Into this:
 |----------|-----------|-----|----------|------------------------------------------------------------|
 ```
 
-[Try it!](http://rawgit.com/slamdata/purescript-jtable/dev-squash/examples/try.html) with your own data or some samples.
+[Try it!](http://rawgit.com/slamdata/purescript-jtable/master/examples/try.html) with your own data or some samples.
 
 
 ## How?
@@ -61,7 +61,7 @@ renderJTable jTableOptsDefault {
   columnOrdering = alphaOrdering } json
 
 ```
-See the [Try it!](http://rawgit.com/slamdata/purescript-jtable/dev-squash/examples/try.html) page and [examples/Examples.purs](examples/Examples.purs) for more usage examples.
+See the [Try it!](http://rawgit.com/slamdata/purescript-jtable/master/examples/try.html) page and [examples/Examples.purs](examples/Examples.purs) for more usage examples.
 
 
 ### API
