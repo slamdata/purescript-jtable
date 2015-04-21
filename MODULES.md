@@ -2,23 +2,45 @@
 
 ## Module Data.Json.JTable
 
-#### `TableStyle`
+#### `noStyle`
 
 ``` purescript
-type TableStyle = { td :: JCursor -> JsonPrim -> Markup, th :: String -> JPath -> Markup, tr :: Markup -> Markup, table :: Markup -> Markup }
-```
-
-#### `ColumnOrdering`
-
-``` purescript
-type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
+noStyle :: TableStyle
 ```
 
 
-#### `JTableOpts`
+#### `bootstrapStyle`
 
 ``` purescript
-type JTableOpts = { maxTupleSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
+bootstrapStyle :: TableStyle
+```
+
+
+#### `debugStyle`
+
+``` purescript
+debugStyle :: TableStyle
+```
+
+
+#### `inOrdering`
+
+``` purescript
+inOrdering :: ColumnOrdering
+```
+
+
+#### `alphaOrdering`
+
+``` purescript
+alphaOrdering :: ColumnOrdering
+```
+
+
+#### `jTableOptsDefault`
+
+``` purescript
+jTableOptsDefault :: JTableOpts
 ```
 
 
@@ -54,28 +76,42 @@ type Table = [[Cell]]
 #### `Tree`
 
 ``` purescript
-data Tree
-  = T String JPath Number Number [Tree]
+newtype Tree
+  = Tree { kids :: [Tree], height :: Number, width :: Number, path :: JPath, label :: String }
 ```
-
-#### `showTree`
-
-``` purescript
-instance showTree :: Show Tree
-```
-
 
 #### `Cell`
 
 ``` purescript
-data Cell
-  = C JCursor Number Number JsonPrim
+newtype Cell
+  = Cell { json :: JsonPrim, height :: Number, width :: Number, cursor :: JCursor }
 ```
 
-#### `showCell`
+#### `Markup`
 
 ``` purescript
-instance showCell :: Show Cell
+type Markup = H.HTML Void Void
+```
+
+
+#### `TableStyle`
+
+``` purescript
+type TableStyle = { td :: JCursor -> JsonPrim -> Number -> Number -> Markup, th :: String -> JPath -> Number -> Number -> Markup, tr :: [Markup] -> Markup, table :: [Markup] -> Markup }
+```
+
+
+#### `ColumnOrdering`
+
+``` purescript
+type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
+```
+
+
+#### `JTableOpts`
+
+``` purescript
+type JTableOpts = { maxTupleSize :: Number, insertHeaderCells :: Boolean, columnOrdering :: ColumnOrdering, style :: TableStyle }
 ```
 
 
@@ -106,11 +142,15 @@ zipWithIndex :: forall a. [a] -> [Tuple a Number]
 widthOfPrimTuple :: Number -> JPath -> [Json] -> Maybe Number
 ```
 
+Maybe return the width of a tuple composed of primitive values
+
 #### `tMergeArray`
 
 ``` purescript
 tMergeArray :: Tree -> Tree -> Tree
 ```
+
+Add child to tree, unify if exists
 
 #### `tFromJson`
 
@@ -118,11 +158,15 @@ tMergeArray :: Tree -> Tree -> Tree
 tFromJson :: Number -> String -> JPath -> Json -> Tree
 ```
 
+Produce a tree of header data from json
+
 #### `cMergeObj`
 
 ``` purescript
 cMergeObj :: [Tuple Number Table] -> Table
 ```
+
+Merge table segments for each key of an object into one
 
 #### `mergeObjTuple`
 
@@ -130,24 +174,23 @@ cMergeObj :: [Tuple Number Table] -> Table
 mergeObjTuple :: Number -> Tree -> JCursor -> [Json] -> Maybe Table
 ```
 
+Maybe merge a tuple of objects into a table segment
+
 #### `cFromJson`
 
 ``` purescript
 cFromJson :: Number -> Tree -> JCursor -> Json -> Table
 ```
 
+Produce data table from json, according to header tree
+
 #### `renderRows`
 
 ``` purescript
-renderRows :: forall a. (Markup -> Markup) -> (Number -> Number -> a -> Markup) -> [[a]] -> Markup
+renderRows :: forall a. ([Markup] -> Markup) -> (Number -> Number -> a -> Markup) -> [[a]] -> [Markup]
 ```
 
-#### `_nattr`
-
-``` purescript
-_nattr :: String -> Number -> Markup -> Markup
-```
-
+Render a grid from an array of arrays
 
 #### `tsToRows`
 
@@ -155,25 +198,29 @@ _nattr :: String -> Number -> Markup -> Markup
 tsToRows :: [Tree] -> [[Tree]]
 ```
 
+Produce header rows from header tree
+
 #### `renderThead`
 
 ``` purescript
-renderThead :: (Markup -> Markup) -> (Tree -> Markup) -> Tree -> Markup
+renderThead :: ([Markup] -> Markup) -> (String -> JPath -> Number -> Number -> Markup) -> Tree -> Markup
 ```
 
 
 #### `renderTbody`
 
 ``` purescript
-renderTbody :: (Markup -> Markup) -> (Cell -> Markup) -> Tree -> Table -> Markup
+renderTbody :: ([Markup] -> Markup) -> (JCursor -> JsonPrim -> Number -> Number -> Markup) -> Tree -> Table -> Markup
 ```
 
 
 #### `sortTree`
 
 ``` purescript
-sortTree :: (String -> JPath -> String -> JPath -> Ordering) -> Tree -> Tree
+sortTree :: ColumnOrdering -> Tree -> Tree
 ```
+
+Sort header tree by ColumnOrdering
 
 #### `strcmp`
 
@@ -187,6 +234,15 @@ strcmp :: String -> String -> Ordering
 ``` purescript
 padTree :: Number -> Tree -> Tree
 ```
+
+Pad tall header cells from above
+
+#### `renderJTableRaw`
+
+``` purescript
+renderJTableRaw :: JTableOpts -> Json -> Markup
+```
+
 
 
 ## Module Data.Json.JSemantic

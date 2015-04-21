@@ -2,6 +2,7 @@
 
 var gulp        = require('gulp')
   , purescript  = require('gulp-purescript')
+  , browserify  = require('gulp-browserify')
   , run         = require('gulp-run')
   , runSequence = require('run-sequence')
   , jsValidate  = require('gulp-jsvalidate')
@@ -70,9 +71,10 @@ function sequence () {
 gulp.task('browser', function() {
     return compile(purescript.psc, [paths.exampleSrc, paths.src].concat(paths.bowerSrc), {
             output: 'jtable.js', 
-            main:'Data.Json.JTable.Examples',
-            modules: ['Data.Json.JTable.Examples', 'Data.Json.JTable']
+            main: 'Main',
+            modules: ['Main']
         })
+        .pipe(browserify({}))
         .pipe(gulp.dest('examples'))
 });
 

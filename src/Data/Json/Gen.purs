@@ -9,11 +9,11 @@ import Test.StrongCheck.Gen
 
 genJsonArray :: Gen Json
 genJsonArray = sized \size -> 
-  (vectorOf size $ resize (size-1) genJson) <#> A.fromArray
+  (vectorOf size $ resize (size - 1) genJson) <#> A.fromArray
 
 genJsonObject :: Gen Json
 genJsonObject = sized \size -> 
-  (vectorOf size $ resize (size-1) arbitrary) <#> SM.fromList >>> A.fromObject
+  (vectorOf size $ resize (size - 1) arbitrary) <#> SM.fromList >>> A.fromObject
 
 genJson :: Gen Json
 genJson = sized \size -> 
@@ -23,8 +23,8 @@ genJson = sized \size ->
     arbitrary <#> A.fromNumber,
     arbitrary <#> A.fromBoolean ] 
   else oneOf (pure jsonNull) [
-    resize (size-1) genJsonArray,
-    resize (size-1) genJsonObject ]
+    resize (size - 1) genJsonArray,
+    resize (size - 1) genJsonObject ]
 
 instance arbJson :: Arbitrary Json where
   arbitrary = genJson
