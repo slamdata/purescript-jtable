@@ -1,72 +1,61 @@
 module Data.Json.JTable
   ( renderJTable, renderJTableDef
-  , JTableOpts(..), jTableOptsDefault
-  , ColumnOrdering(..), inOrdering, alphaOrdering
-  , TableStyle(..), noStyle, bootstrapStyle, debugStyle
+  , jTableOptsDefault
+  , inOrdering, alphaOrdering
+  , noStyle, bootstrapStyle, debugStyle
   ) where
 
 import Data.String (joinWith)
 import Data.Argonaut.Core (Json(..))
 import Data.Argonaut.JCursor (JCursor(..), JsonPrim(..), runJsonPrim)
-import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, small)
-import Text.Smolder.HTML.Attributes (className)
-import Text.Smolder.Markup (Markup(..), MarkupM(..), Attributable, attribute, (!), text)
 import Data.Foldable (mconcat)
 
-import Data.Json.JTable.Internal (JPath(..), Tree(..), Cell(..), renderJTableRaw, strcmp)
+import Data.Json.JTable.Internal (JPath(), Tree(..), Cell(..), Markup(), TableStyle(), ColumnOrdering(), JTableOpts(), renderJTableRaw, strcmp)
 
--- type JPath = [String]
+import qualified Halogen.HTML as H
+import qualified Halogen.HTML.Attributes as A
 
-type TableStyle = {
-  table :: Markup -> Markup,
-  tr    :: Markup -> Markup ,
-  th    :: String -> JPath -> Markup,
-  td    :: JCursor -> JsonPrim -> Markup }
+renderJsonSimple :: JsonPrim -> String
+renderJsonSimple j = runJsonPrim j (const "") show show id
 
-renderJsonSimple j = runJsonPrim j (const "&nbsp;") show show id
+noStyle :: TableStyle
+noStyle = 
+  { table: H.table_
+  , tr:    H.tr_
+  , th:    \l _ w h -> H.th [ A.colSpan w, A.rowSpan h ] [ H.text l ]
+  , td:    \_ j w h -> H.td [ A.colSpan w, A.rowSpan h ] [ H.text $ renderJsonSimple j ]
+  }
 
-noStyle = {
-  table: table, 
-  tr: tr, 
-  th: \l p -> th $ text l,
-  td: \c j -> td $ text $ renderJsonSimple j
-    
-} :: TableStyle
+bootstrapStyle :: TableStyle
+bootstrapStyle = noStyle { table = H.table [ A.class_ (A.className "table") ] }
 
-bootstrapStyle = (noStyle {
-  table = \m -> table ! attribute "class" "table" $ m}) :: TableStyle
+debugStyle :: TableStyle
+debugStyle = noStyle
+  { th = \_ p w h -> H.th [ A.colSpan w, A.rowSpan h ] 
+                          [ H.text $ joinWith "." p ]
+  , td = \c j w h -> H.td [ A.colSpan w, A.rowSpan h ]  
+                          [ H.small [ A.class_ (A.className "grey") ] [ H.text (show c) ]
+                          , H.br_ []
+                          , H.text (show j)
+                          ]
+  }
 
-debugStyle = (noStyle {
-  th = (\l p -> th $ text $ joinWith "." p),
-  td = (\c j -> td $ mconcat $
-    [(small ! className "grey" $ text $ show c), (br), (text $ show j)]
-)}::TableStyle)
+inOrdering :: ColumnOrdering
+inOrdering _ _ _ _ = EQ
 
+alphaOrdering :: ColumnOrdering
+alphaOrdering l1 _ l2 _ = strcmp l1 l2
 
-type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
-
-inOrdering = (\l1 p1 l2 p2 -> EQ) :: ColumnOrdering
-alphaOrdering = (\l1 p1 l2 p2 -> strcmp l1 l2) :: ColumnOrdering
-
-
-type JTableOpts = {
-  style :: TableStyle,
-  columnOrdering :: ColumnOrdering,
-  insertHeaderCells :: Boolean,
-  maxTupleSize :: Number }
-
-jTableOptsDefault  = {
-  style: noStyle,
-  columnOrdering: inOrdering,
-  insertHeaderCells: false,
-  maxTupleSize: 10
-} :: JTableOpts
-
-
+jTableOptsDefault :: JTableOpts
+jTableOptsDefault = 
+  { style: noStyle
+  , columnOrdering: inOrdering
+  , insertHeaderCells: false
+  , maxTupleSize: 10
+  }
+  
 renderJTable :: JTableOpts -> Json -> Markup
-renderJTable o = renderJTableRaw o { style = o.style {
-  th = (\(T l p _ _ _) -> o.style.th l p),
-  td = (\(C c _ _ j) -> o.style.td c j) }}
+renderJTable = renderJTableRaw
 
 renderJTableDef :: Json -> Markup
 renderJTableDef = renderJTable jTableOptsDefault
