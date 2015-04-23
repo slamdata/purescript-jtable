@@ -6,18 +6,14 @@ import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..), fst)
 import Data.Argonaut.Core (Json(..), jsonNull)
 import Data.Argonaut.JCursor (JCursor(..))
-import qualified Text.Smolder.HTML as H
-import Text.Smolder.Markup (Markup(..), text)
-import qualified Text.Smolder.Renderer.String (render) as Sm
+
 import Test.StrongCheck (quickCheck, Result(..), (<?>))
 import Debug.Trace (print, trace)
-import Debug.Spy (spy)
 
 import Data.Json.Gen (genJson)
 import Data.Json.JTable.Internal (
-  Tree(..), tWidth, tHeight, tKids, tFromJson, tsToRows,
-  Cell(..), cWidth, cHeight, cFromJson, renderRows)
-
+  Tree(..), runTree, tFromJson, tsToRows,
+  Cell(..), runCell, cFromJson, renderRows)
 
 -- repeat cells with [row|col]span 
 unprojectT :: forall a. (a -> Number) -> (a -> Number) -> [[a]] -> [[a]]
@@ -34,8 +30,11 @@ unprojectT widthFn heightFn rows =
       in fst $ foldl op' (Tuple [] nrow) r 
     in (foldl op [] rows') <#> (<#> fst)
 
-unprojectTreeT = unprojectT tWidth tHeight
-unprojectCellT = unprojectT cWidth cHeight
+unprojectTreeT :: [[Tree]] -> [[Tree]]
+unprojectTreeT = unprojectT (runTree >>> _.width) (runTree >>> _.height)
+
+unprojectCellT :: [[Cell]] -> [[Cell]]
+unprojectCellT = unprojectT (runCell >>> _.width) (runCell >>> _.height)
 
 -- check that all rows are the same length
 isRectangularT :: forall a. [[a]] -> Boolean
@@ -52,29 +51,11 @@ lengthsOkT t1 t2 =
 checkTable :: Json -> Result
 checkTable json = let
   t = tFromJson 2 "" [] json
-  hrs = tsToRows (t # tKids)
+  hrs = tsToRows (runTree t).kids
   drs = cFromJson 2 t JCursorTop json
   uhrs = unprojectTreeT $ hrs
   udrs = unprojectCellT $ drs
   in (isRectangularT uhrs) && (isRectangularT udrs) && 
      (lengthsOkT uhrs udrs) <?> show json 
 
-
--- print unprojected html for debugging
-barf :: Json -> String
-barf json = let 
-  t = tFromJson 2 "" [] json
-  hrs = tsToRows (t # tKids)
-  drs = cFromJson 2 t JCursorTop json
-  th' = \y x (T l p w h k) -> H.th $ text $ show l
-  td' = \y x   (C c w h j) -> H.td $ text $ show j
-  in Sm.render $ H.table $ do 
-    H.thead $ renderRows H.tr th' $ unprojectTreeT hrs
-    H.tbody $ renderRows H.tr td' $ unprojectCellT drs
-
--- foreign import j """var j = null""" :: Json
-
-main = do
-  quickCheck checkTable
-  -- print $ checkTable j
-  -- trace $ barf j
+main = quickCheck checkTable

@@ -12,11 +12,6 @@ import DOM
 
 import Data.Bifunctor (bimap)
 
-import Data.DOM.Simple.Document
-import Data.DOM.Simple.Element
-import Data.DOM.Simple.Types
-import Data.DOM.Simple.Window
-
 import Data.Argonaut.Core (Json())
 import Data.Argonaut.Parser (jsonParser)
 import Data.Json.JTable (renderJTable, jTableOptsDefault, bootstrapStyle)
@@ -32,8 +27,12 @@ import qualified Halogen.HTML.Attributes as A
 import qualified Halogen.HTML.Events as A
 import qualified Halogen.HTML.Events.Forms as A
 
-appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
-appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
+foreign import appendToBody 
+  "function appendToBody(node) {\
+  \  return function() {\
+  \    document.body.appendChild(node);\
+  \  };\
+  \}":: forall eff. Node -> Eff (dom :: DOM | eff) Unit
 
 ui :: forall p m eff. (Alternative m) => Component p m String String
 ui = component (render <$> (input `startingAt` ""))

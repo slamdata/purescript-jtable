@@ -1,18 +1,13 @@
 module Test.Data.Json.JSemantic where
 
-import Test.Unit
 import Data.Maybe
 import Data.Argonaut.Core
 import Data.Argonaut.JCursor
-import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, span, small)
-import Text.Smolder.Markup ((!), text)
-import qualified Text.Smolder.Renderer.String (render) as Sm
-import qualified Data.Date as D
-import Debug.Trace
-import Debug.Spy
-
 import Data.Json.JSemantic
 
+import qualified Data.Date as D
+
+import Test.Unit
 
 main = do
   let tf s j r = assert s $ r == toSemanticDef j

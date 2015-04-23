@@ -1,18 +1,14 @@
 module Test.Data.Json.JTable.Unit where
-
-import Test.Unit (test, assert)
+    
 import Data.Maybe (Maybe(..))
 import Data.Argonaut.Core (Json(..))
 import Data.Argonaut.JCursor (primToJson, primNull)
-import Text.Smolder.HTML (table, thead, tbody, tr, th, td, br, span, small)
-import Text.Smolder.Markup ((!), text)
-import qualified Text.Smolder.Renderer.String (render) as Sm
-import Debug.Spy (spy)
--- import Data.Traversable (for)
-
-import Data.Json.JTable.Internal (widthOfPrimTuple, strcmp, renderJTableRaw)
 import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
+import Data.Json.JTable.Internal (widthOfPrimTuple, strcmp, renderJTableRaw)
 
+import qualified Halogen.HTML.Renderer.String as H
+
+import Test.Unit (test, assert)
 
 jNull = primToJson primNull
 foreign import j0 "var j0 = 0" :: Json
@@ -35,7 +31,6 @@ foreign import jObj2EArr "var jObj2EArr = {a:[], b:'one'}" :: Json
 foreign import jObjWeird "var jObjWeird = {a:{x:[1,2,3,4], y:[]}, b:[1,2,3,4,5]}" :: Json
 foreign import jArrObj2Tups "var jArrObj2Tups = [{a:[3,2,1],b:[1,2]},{a:null,b:[3,2,1]}]" :: Json
 foreign import jMergeObjTup "var jMergeObjTup = [{a:{x:0}, b:8}, {a: [1,2], b:9}]" :: Json
-
 
 main = do
   test "widthOfPrimTuple" do
@@ -67,7 +62,7 @@ main = do
     tf "e" "é" LT
     tf "É" "e" GT
   test "renderJTableRaw" do
-    let tf s j r = assert s $ (Sm.render $ renderJTableDef j) == r
+    let tf s j r = assert s $ (H.renderHTMLToString $ renderJTableDef j) == r
     tf "null" jNull $ 
       "<table><thead/><tbody><tr><td>&nbsp;</td></tr></tbody></table>"
     tf "0" j0 $ 
@@ -103,7 +98,7 @@ main = do
 
   test "insertHeaderCells" do
     let o = jTableOptsDefault {insertHeaderCells = true}
-    let tf s j r = assert s $ (Sm.render $ renderJTable o j) == r
+    let tf s j r = assert s $ (H.renderHTMLToString $ renderJTable o j) == r
     tf "jObj2Obj2" jObj2Obj2 $ 
       "<table><thead><tr><th></th><th colspan=\"2\">b</th></tr>" ++ 
       "<tr><th>a</th><th>b1</th><th>b2</th></tr></thead>" ++ 

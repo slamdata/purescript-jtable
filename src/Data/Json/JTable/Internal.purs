@@ -1,6 +1,7 @@
 module Data.Json.JTable.Internal
   ( renderJTableRaw, renderRows, renderThead, renderTbody, tsToRows, sortTree
-  , Tree(..), Cell(..)
+  , Tree(..), runTree
+  , Cell(..), runCell
   , JPath(), Table(), Markup(), TableStyle(), ColumnOrdering(), JTableOpts()
   , tFromJson, tMergeArray, widthOfPrimTuple, padTree
   , cFromJson, cMergeObj, mergeObjTuple
