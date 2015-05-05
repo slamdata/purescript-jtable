@@ -10,7 +10,10 @@ import Control.Alternative
 
 import DOM
 
-import Data.Bifunctor (bimap)
+import Data.DOM.Simple.Document
+import Data.DOM.Simple.Element
+import Data.DOM.Simple.Types
+import Data.DOM.Simple.Window
 
 import Data.Argonaut.Core (Json())
 import Data.Argonaut.Parser (jsonParser)
@@ -27,17 +30,13 @@ import qualified Halogen.HTML.Attributes as A
 import qualified Halogen.HTML.Events as A
 import qualified Halogen.HTML.Events.Forms as A
 
-foreign import appendToBody 
-  "function appendToBody(node) {\
-  \  return function() {\
-  \    document.body.appendChild(node);\
-  \  };\
-  \}":: forall eff. Node -> Eff (dom :: DOM | eff) Unit
+appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
+appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
 
-ui :: forall p m eff. (Alternative m) => Component p m String String
-ui = component (render <$> (input `startingAt` ""))
+ui :: forall m eff. (Alternative m) => Component m String String
+ui = render <$> (input `startingAt` "")
   where
-  render :: String -> H.HTML p (m String)
+  render :: String -> H.HTML (m String)
   render json = 
     H.div [ A.class_ (A.className "container") ]
           [ H.h1_ [ H.text "purescript-jtable demo" ]
@@ -51,10 +50,10 @@ ui = component (render <$> (input `startingAt` ""))
                                           ])
                               ] [] ]
           , H.h2_ [ H.text "Output" ]
-          , either H.text (bimap absurd absurd) table
+          , either H.text (absurd <$>) table
           ]
     where
-    table :: Either String (H.HTML Void Void)
+    table :: Either String (H.HTML Void)
     table = renderJTable (jTableOptsDefault { style = bootstrapStyle }) <$> jsonParser json
 
 main = do

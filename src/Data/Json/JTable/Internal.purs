@@ -70,7 +70,7 @@ runCell :: Cell ->
   }
 runCell (Cell c) = c
 
-type Markup = H.HTML Void Void
+type Markup = H.HTML Void
 
 type TableStyle =
   { table :: [Markup] -> Markup
