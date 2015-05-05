@@ -80,6 +80,13 @@ newtype Tree
   = Tree { kids :: [Tree], height :: Number, width :: Number, path :: JPath, label :: String }
 ```
 
+#### `runTree`
+
+``` purescript
+runTree :: Tree -> { kids :: [Tree], height :: Number, width :: Number, path :: JPath, label :: String }
+```
+
+
 #### `Cell`
 
 ``` purescript
@@ -87,10 +94,17 @@ newtype Cell
   = Cell { json :: JsonPrim, height :: Number, width :: Number, cursor :: JCursor }
 ```
 
+#### `runCell`
+
+``` purescript
+runCell :: Cell -> { json :: JsonPrim, height :: Number, width :: Number, cursor :: JCursor }
+```
+
+
 #### `Markup`
 
 ``` purescript
-type Markup = H.HTML Void Void
+type Markup = H.HTML Void
 ```
 
 
