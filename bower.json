@@ -18,7 +18,7 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-argonaut": "~0.5.0",
+    "purescript-argonaut": "~0.6.0",
     "purescript-datetime": "~0.5.0",
     "purescript-strings": "~0.4.3",
     "purescript-halogen": "master",
