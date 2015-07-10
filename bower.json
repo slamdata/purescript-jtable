@@ -21,7 +21,7 @@
     "purescript-argonaut": "~0.6.0",
     "purescript-datetime": "~0.5.0",
     "purescript-strings": "~0.4.3",
-    "purescript-halogen": "master",
+    "purescript-halogen": "b1636e2537526963f89134c7b4fd8005c1b62e37",
     "purescript-strongcheck": "~0.9.0"
   },
   "devDependencies": {
