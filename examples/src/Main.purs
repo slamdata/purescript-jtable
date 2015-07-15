@@ -1,8 +1,10 @@
 module Main where
 
+import Prelude 
 import Data.Void
 import Data.Tuple
 import Data.Either
+import Data.List (toList)
 
 import Control.Bind
 import Control.Monad.Eff
@@ -29,6 +31,7 @@ import qualified Halogen.HTML as H
 import qualified Halogen.HTML.Attributes as A
 import qualified Halogen.HTML.Events as A
 import qualified Halogen.HTML.Events.Forms as A
+import qualified Halogen.HTML.CSS as C
 
 appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
 appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
@@ -44,10 +47,6 @@ ui = render <$> (input `startingAt` "")
           , H.p_ [ H.textarea [ A.class_ (A.className "form-control") 
                               , A.value json 
                               , A.onInput (A.input id)
-                              , A.style (A.styles $ StrMap.fromList 
-                                          [ Tuple "font-family" "monospace"
-                                          , Tuple "height" "200px"
-                                          ])
                               ] [] ]
           , H.h2_ [ H.text "Output" ]
           , either H.text (absurd <$>) table

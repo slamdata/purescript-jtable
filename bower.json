@@ -18,21 +18,16 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-argonaut": "~0.6.0",
-    "purescript-datetime": "~0.5.0",
-    "purescript-strings": "~0.4.3",
-    "purescript-halogen": "b1636e2537526963f89134c7b4fd8005c1b62e37",
-    "purescript-strongcheck": "~0.9.0"
+    "purescript-halogen": "30e8b2c7174a1eeda73f67cc42c739ca24a1e218",
+    "purescript-base": "^0.1.0",
+    "purescript-datetime": "^0.6.0",
+    "purescript-argonaut-core": "^0.1.0",
+    "purescript-argonaut-traversals": "^0.1.0"
   },
   "devDependencies": {
-    "purescript-debug-foreign": "~0.0.4",
-    "purescript-test-unit": "~1.1.5"
+    "purescript-strongcheck": "^0.10.0"
   },
   "resolutions": {
-    "purescript-tuples": "~0.3.4",
-    "purescript-monoid": "~0.2.0",
-    "purescript-foldable-traversable": "~0.3.0",
-    "purescript-identity": "~0.3.0",
-    "purescript-transformers": "~0.5.1"
+    "purescript-lens": "^0.8.0"
   }
 }
