@@ -1,101 +1,111 @@
 'use strict'
-
 var gulp        = require('gulp')
   , purescript  = require('gulp-purescript')
-  , browserify  = require('gulp-browserify')
   , run         = require('gulp-run')
   , runSequence = require('run-sequence')
-  , jsValidate  = require('gulp-jsvalidate')
+  , browserify  = require('browserify')
+  , plumber     = require('gulp-plumber')
+  , buffer      = require('vinyl-buffer')
+  , source      = require('vinyl-source-stream')
   ;
 
-var paths = {
-    src: 'src/**/*.purs',
-    bowerSrc: [
-      'bower_components/purescript-*/src/**/*.purs',
-      'bower_components/purescript-*/src/**/*.purs.hs'
-    ],
-    dest: '',
-    docs: {
-        'all': {
-            dest: 'MODULES.md',
-            src: [
-              'src/Data/Json/JTable.purs',
-              'src/Data/Json/JTable/Internal.purs',
-              'src/Data/Json/JSemantic.purs',
-              'src/Data/Json/Gen.purs'
-            ]
-        }
-    },
-    exampleSrc: 'examples/Examples.purs',
-    test: 'test/**/*.purs'
-};
-
-var options = {
-    test: {
-        main: 'Test.Main',
-        output: 'output/test.js'
-    }
-};
-
-function compile (compiler, src, opts) {
-    var psc = compiler(opts);
-    psc.on('error', function(e) {
-        console.error(e.message);
-        psc.end();
-    });
-    return gulp.src(src.concat(paths.bowerSrc))
-        .pipe(psc)
-        .pipe(jsValidate());
-};
-
-function docs (target) {
-    return function() {
-        var docgen = purescript.pscDocs();
-        docgen.on('error', function(e) {
-            console.error(e.message);
-            docgen.end();
-        });
-        return gulp.src(paths.docs[target].src)
-            .pipe(docgen)
-            .pipe(gulp.dest(paths.docs[target].dest));
-    }
-}
-
-function sequence () {
+function sequence() {
     var args = [].slice.apply(arguments);
     return function() {
         runSequence.apply(null, args);
-    }
+    };
 }
 
-gulp.task('browser', function() {
-    return compile(purescript.psc, [paths.exampleSrc, paths.src].concat(paths.bowerSrc), {
-            output: 'jtable.js', 
-            main: 'Main',
-            modules: ['Main']
-        })
-        .pipe(browserify({}))
-        .pipe(gulp.dest('examples'))
+var sources = [
+    'src/**/*.purs',
+    'bower_components/purescript-*/src/**/*.purs'
+];
+
+var foreigns = [
+    'src/**/*.js',
+    'bower_components/purescript-*/src/**/*.js'
+];
+
+var testSources = [
+    'test/**/*.purs'
+];
+
+var testForeigns = [
+    'test/**/*.js'
+];
+
+var exampleSources = [
+    'examples/src/**/*.purs'
+];
+
+var exampleForeigns = [
+    'example/src/**/*.js'
+];
+
+gulp.task('docs', function() {
+    return purescript.pscDocs({
+        src: sources,
+        docgen: {
+            "Data.Json.JSemantic": "docs/Data/Json/JSemantic.md",
+            "Data.Json.JTable": "docs/Data/Json/JTable.md",
+            "Data.Json.JTable.Internal": "docs/Data/Json/JTable/Internal.md"
+        }
+    });
 });
+
 
 gulp.task('make', function() {
-    return compile(purescript.pscMake, [paths.src].concat(paths.bowerSrc), {})
-        .pipe(gulp.dest(paths.dest))
+    return purescript.psc({
+        src: sources,
+        ffi: foreigns
+    });
 });
 
-gulp.task('test', function() {
-    return compile(purescript.psc, [paths.src, paths.test].concat(paths.bowerSrc), options.test)
-        .pipe(run('node').exec());
+gulp.task('test-make', function() {
+    return purescript.psc({
+        src: sources.concat(testSources),
+        ffi: foreigns.concat(testForeigns)
+    });
 });
 
-gulp.task('docs', docs('all'));
-
-gulp.task('watch-browser', function() {
-    gulp.watch(paths.src, sequence('browser', 'docs'));
+gulp.task('test-bundle', ['test-make'], function() {
+    return purescript.pscBundle({
+        src: "output/**/*.js",
+        main: "Test.Main",
+        output: "dist/test.js"
+    });
 });
 
-gulp.task('watch-make', function() {
-    gulp.watch(paths.src, sequence('make', 'docs'));
+gulp.task('test', ['test-bundle'], function() {
+    run('phantomjs dist/test.js');
 });
 
-gulp.task('default', sequence('make', 'docs', 'browser'));
+
+gulp.task('example-make', function() {
+    return purescript.psc({
+        src: sources.concat(exampleSources),
+        ffi: foreigns.concat(exampleForeigns)
+    });
+});
+
+gulp.task('example-bundle', ["example-make"], function() {
+    return purescript.pscBundle({
+        src: "output/**/*.js",
+        main: "Main",
+        output: "dist/example.js"
+    });
+});
+
+gulp.task('example-browserify', ['example-bundle'], function() {
+    return browserify({
+        entries: ['dist/example.js'],
+        paths: ['node_modules']
+    })
+        .bundle()
+        .pipe(plumber())
+        .pipe(source('jtable.js'))
+        .pipe(buffer())
+        .pipe(gulp.dest('examples'));
+});
+
+gulp.task("default", sequence("make", "docs"));

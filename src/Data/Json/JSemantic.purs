@@ -1,19 +1,22 @@
-module Data.Json.JSemantic
-  ( JSemantic(..), toSemantic, toSemanticDef
-  , JSemanticOpts(..), jSemanticOptsDefault
+module Data.Json.JSemantic  
+  ( JSemantic(..), JSemanticRegexes(), toSemantic, toSemanticDef
+  , JSemanticOpts(..), jSemanticOptsDefault, renderJSemantic
   ) where
 
+import Prelude
 import Data.Argonaut.JCursor(JsonPrim(..), runJsonPrim)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Array (head, tail)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Array ((!!))
 import Data.String (split)
 import Data.String.Regex (Regex(..), regex, test, match, noFlags, parseFlags, replace)
+import Data.Int (fromNumber)
+import Control.MonadPlus (guard)
 import qualified Data.Date as Date
 import Control.Alt ((<|>))
 import Math (floor)
 
 
-data JSemantic = Integral   Number
+data JSemantic = Integral   Int
                | Fractional Number
                | Date       Date.Date
                | DateTime   Date.Date
@@ -39,19 +42,18 @@ instance showJSemantic :: Show JSemantic where
   show (NA)           = "NA"
 
 instance eqJSemantic :: Eq JSemantic where
-  (==) (Integral   a) (Integral   b) = a == b
-  (==) (Fractional a) (Fractional b) = a == b
-  (==) (Date       a) (Date       b) = a == b
-  (==) (DateTime   a) (DateTime   b) = a == b
-  (==) (Time       a) (Time       b) = a == b
-  (==) (Interval u v) (Interval x y) = (u == x) && (v == y)
-  (==) (Text       a) (Text       b) = a == b
-  (==) (Bool       a) (Bool       b) = a == b
-  (==) (Percent    a) (Percent    b) = a == b
-  (==) (Currency   a) (Currency   b) = a == b
-  (==) (NA) (NA) = true
-  (==) _ _ = false
-  (/=) a b = not (a == b)
+  eq (Integral   a) (Integral   b) = a == b
+  eq (Fractional a) (Fractional b) = a == b
+  eq (Date       a) (Date       b) = a == b
+  eq (DateTime   a) (DateTime   b) = a == b
+  eq (Time       a) (Time       b) = a == b
+  eq (Interval u v) (Interval x y) = (u == x) && (v == y)
+  eq (Text       a) (Text       b) = a == b
+  eq (Bool       a) (Bool       b) = a == b
+  eq (Percent    a) (Percent    b) = a == b
+  eq (Currency   a) (Currency   b) = a == b
+  eq (NA) (NA) = true
+  eq _ _ = false
 
 renderJSemantic :: JSemantic -> String
 renderJSemantic j = case j of
@@ -67,59 +69,84 @@ renderJSemantic j = case j of
   (Currency   n) -> "$" ++ show n
   (NA)           -> ""
 
-type JSemanticOpts = {
-  regexps :: {
-    percent :: Regex,
-    currency :: Regex,
-    date :: Regex } }
+type JSemanticRegexes =
+  { percent :: Regex
+  , currency :: Regex
+  , date :: Regex
+  }
+
+type JSemanticOpts = 
+  { regexps :: JSemanticRegexes
+  }
 
 -- source: http://www.fileformat.info/info/unicode/category/Sc/list.htm
-currency_symbols = """[\$\u20A0-\u20CF\u00A2\u00A3\u00A4\u00A5\u058F\u060B\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]"""
+currencySymbols :: String
+currencySymbols = """[\$\u20A0-\u20CF\u00A2\u00A3\u00A4\u00A5\u058F\u060B\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6]"""
 
-jSemanticOptsDefault = {
-  regexps : { -- the first capture group will be used
-    percent: rx """^(-?\d+(\.\d+)?)\%$""",
-    currency: rx $ "^" ++ currency_symbols ++ """?(([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?)$""",
-    date: rx """^((\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})Z?[+-](\d{2})\:(\d{2}))$"""
-}} :: JSemanticOpts
+-- the first capture group will be used 
+currencyNums :: String
+currencyNums = """?(([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?)$"""
+
+dateStr :: String
+dateStr = """^((\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})Z?[+-](\d{2})\:(\d{2}))$"""
+
+percentStr :: String
+percentStr = """^(-?\d+(\.\d+)?)\%$"""
+
+
+jSemanticOptsDefault :: JSemanticOpts
+jSemanticOptsDefault = 
+  { regexps: { percent: rx percentStr
+             , currency: rx $ "^" ++ currencySymbols ++ currencyNums
+             , date: rx dateStr
+             }
+  } 
 
 rx s = regex s noFlags
 rg s = regex s $ parseFlags "g"
 
-
 analyzeNum :: Number -> JSemantic
-analyzeNum n | floor n == n = Integral n
-analyzeNum n                = Fractional n
+analyzeNum n = maybe (Fractional n) Integral $ fromNumber n
 
-foreign import _s2n """var _s2n = function (Just) { return function(Nothing) {
-  return function (s) { 
-    var n = s * 1; if (isNaN(n)) {return Nothing} else {return Just(n)} 
-}}}""" :: (Number -> Maybe Number) -> Maybe Number -> String -> Maybe Number
+
+foreign import s2nImpl :: (Number -> Maybe Number) -> Maybe Number -> String -> Maybe Number
 
 s2n :: String -> Maybe Number
-s2n = _s2n Just Nothing
+s2n = s2nImpl Just Nothing
 
-parseX :: forall a. Regex -> (String -> Maybe a) -> (a -> JSemantic) -> String -> Maybe JSemantic
-parseX regexp parser constr s = 
-  case match regexp s of
-    Just (_ : s1 : _) -> constr <$> parser s1
-    _                 -> Nothing
+parseX :: forall a. Regex -> (String -> Maybe a) -> (a -> JSemantic) -> String ->
+          Maybe JSemantic
+parseX regexp parser constr s = do
+  matched <- match regexp s
+  s1 <- matched !! 1
+  constr <$> (s1 >>= parser)
 
+parsePercent :: Regex -> String -> Maybe JSemantic 
 parsePercent  r = parseX r s2n Percent
+
+parseCurrency :: Regex -> String -> Maybe JSemantic
 parseCurrency r = parseX r (replace (rg ",") "" >>> s2n) Currency
+
+parseDateTime :: Regex -> String -> Maybe JSemantic
 parseDateTime r = parseX r Date.fromString DateTime 
 
-parseInterval r s = case split " - " s of
-  (s1 : s2 : []) | test r s1 && test r s2 ->
-    Interval <$> Date.fromString s1 <*> Date.fromString s2
-  _ -> Nothing
+parseInterval :: Regex -> String -> Maybe JSemantic
+parseInterval r s = do
+  let arr = split " - " s
+  s1 <- arr !! 0
+  s2 <- arr !! 1
+  guard $ (test r s1) && (test r s2)
+  d1 <- Date.fromString s1
+  d2 <- Date.fromString s2
+  pure $ Interval d1 d2
 
 -- analyzeStr :: {regexps} -> String -> JSemantic
-analyzeStr rs s = (Text s) `fromMaybe`  (  parsePercent rs.percent s
+analyzeStr :: JSemanticRegexes -> String -> JSemantic
+analyzeStr rs s = fromMaybe (Text s) (    parsePercent rs.percent s
                                       <|> parseCurrency rs.currency s
                                       <|> parseDateTime rs.date s
                                       <|> parseInterval rs.date s
-                                      )
+                                     )
   -- TODO: date, time
 
 toSemantic :: JSemanticOpts -> JsonPrim -> JSemantic
@@ -127,3 +154,4 @@ toSemantic o p = runJsonPrim p (const NA) Bool analyzeNum (analyzeStr o.regexps)
 
 toSemanticDef :: JsonPrim -> JSemantic
 toSemanticDef = toSemantic jSemanticOptsDefault
+

@@ -3,5 +3,7 @@
 /bower_components/
 /tmp/
 /node_modules/
+/dist/
+/examples/jtable.js
 .psci
 .psci_modules
