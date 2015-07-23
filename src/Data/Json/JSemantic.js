@@ -13,3 +13,7 @@ exports.s2nImpl = function(Just) {
         };
     };
 };
+
+exports.toString = function(d) {
+    return d.toString();
+};

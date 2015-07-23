@@ -1,5 +1,11 @@
 ## Module Data.Json.JSemantic
 
+#### `TimeRec`
+
+``` purescript
+type TimeRec = { hours :: Hours, minutes :: Minutes, seconds :: Seconds, milliseconds :: Milliseconds }
+```
+
 #### `JSemantic`
 
 ``` purescript
@@ -8,12 +14,12 @@ data JSemantic
   | Fractional Number
   | Date Date
   | DateTime Date
-  | Time Date
+  | Time TimeRec
   | Interval Date Date
   | Text String
   | Bool Boolean
   | Percent Number
-  | Currency Number
+  | Currency String Number
   | NA
 ```
 
@@ -23,28 +29,28 @@ instance showJSemantic :: Show JSemantic
 instance eqJSemantic :: Eq JSemantic
 ```
 
-#### `JSemanticRegexes`
+#### `renderJSemantic`
 
 ``` purescript
-type JSemanticRegexes = { percent :: Regex, currency :: Regex, date :: Regex }
+renderJSemantic :: JSemantic -> String
 ```
 
-#### `JSemanticOpts`
+#### `JSemanticParsers`
 
 ``` purescript
-type JSemanticOpts = { regexps :: JSemanticRegexes }
+type JSemanticParsers = { boolParsers :: List (Boolean -> Maybe JSemantic), numberParsers :: List (Number -> Maybe JSemantic), stringParsers :: List (String -> Maybe JSemantic) }
 ```
 
-#### `jSemanticOptsDefault`
+#### `defaultParsers`
 
 ``` purescript
-jSemanticOptsDefault :: JSemanticOpts
+defaultParsers :: JSemanticParsers
 ```
 
 #### `toSemantic`
 
 ``` purescript
-toSemantic :: JSemanticOpts -> JsonPrim -> JSemantic
+toSemantic :: JSemanticParsers -> JsonPrim -> JSemantic
 ```
 
 #### `toSemanticDef`
