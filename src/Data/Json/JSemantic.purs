@@ -40,7 +40,7 @@ timeRecToString { hours: (Time.Hours h)
                 } =
   
   show h <> ":" <> show m <> ":" <> show s <>
-  (if ms > 0
+  (if ms > zero
    then ("." <> show ms)
    else "")
         
@@ -170,16 +170,15 @@ currencyRightString str = do
 timeString :: String -> Maybe JSemantic
 timeString str = do
   matched <- match (rx timeStr) str
-  h <- matched A.!! 1 >>= toInt
-  m <- matched A.!! 2 >>= toInt
-  let s = maybe zero Time.Seconds $ matched A.!! 4 >>= toInt
-      ms = maybe zero Time.Milliseconds $ matched A.!! 6 >>= toInt
+  h <- matched A.!! 1 >>= id >>= s2n
+  m <- matched A.!! 2 >>= id >>= s2n
+  let s = maybe zero Time.Seconds $ matched A.!! 4 >>= id >>= s2n
+      ms = maybe zero Time.Milliseconds $ matched A.!! 6 >>= id >>= s2n
   pure $ Time { hours: Time.Hours h
               , minutes: Time.Minutes m
               , seconds: s
               , milliseconds: ms
               }
-  where toInt x = x >>= s2n >>= fromNumber
 
 datetimeString :: String -> Maybe JSemantic
 datetimeString str = do

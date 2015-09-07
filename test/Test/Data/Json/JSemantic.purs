@@ -51,15 +51,15 @@ main = do
   assertion "integral 0" (primStr "0") (Integral 0)
   assertion "fractional 123.45" (primStr "123.45") (Fractional 123.45)
   assertion "fractional -234.56" (primStr "-234.56") (Fractional (-234.56))
-  assertion "time 12:34:56" (primStr "12:34:56") (Time { hours: Hours 12
-                                                       , minutes: Minutes 34
-                                                       , seconds: Seconds 56
-                                                       , milliseconds: Milliseconds 0
+  assertion "time 12:34:56" (primStr "12:34:56") (Time { hours: Hours 12.0
+                                                       , minutes: Minutes 34.0
+                                                       , seconds: Seconds 56.0
+                                                       , milliseconds: Milliseconds 0.0
                                                        })
   assertion "time 23:45:01.123" (primStr "23:45:01.123")
-    (Time { hours: Hours 23
-          , minutes: Minutes 45
-          , seconds: Seconds 1
-          , milliseconds: Milliseconds 123
+    (Time { hours: Hours 23.0
+          , minutes: Minutes 45.0
+          , seconds: Seconds 1.0
+          , milliseconds: Milliseconds 123.0
           })
   assertion "incorrect time 56:12:12" (primStr "56:12:12") (Text "56:12:12")
