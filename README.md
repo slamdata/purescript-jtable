@@ -39,13 +39,10 @@ Into this:
 |----------|-----------|-----|----------|------------------------------------------------------------|
 ```
 
-[Try it!](http://rawgit.com/slamdata/purescript-jtable/master/examples/try.html) with your own data or some samples.
-
 
 ## How?
 
 Install with bower: `$ bower install slamdata/purescript-jtable`
-Or use the compiled browser version at [examples/jtable.js](examples/jtable.js)
 
 
 ### Example Usage
@@ -61,7 +58,9 @@ renderJTable jTableOptsDefault {
   columnOrdering = alphaOrdering } json
 
 ```
-See the [Try it!](http://rawgit.com/slamdata/purescript-jtable/master/examples/try.html) page and [examples/Examples.purs](examples/Examples.purs) for more usage examples.
+
+See the [examples/src/Main.purs](examples/src/Main.purs) for more usage
+examples.
 
 
 ### API
@@ -100,6 +99,9 @@ inOrdering    :: ColumnOrdering  -- example ordering: noop
 alphaOrdering :: ColumnOrdering  -- example ordering: alphabetic
 ```
 
-The `Json` and `JCursor` data types that appear in the API are from [purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut). The `Markup` data type that appears in the API is from [purescript-smolder](https://github.com/bodil/purescript-smolder).
+The `Json` and `JCursor` data types that appear in the API are from
+[purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut).
+The `Markup` data type that appears in the API is a synonym for `HTML Void`
+from [purescript-halogen](https://github.com/slamdata/purescript-halogen).
 
 Both of these libraries are listed as dependencies in [bower.json](bower.json).
