@@ -42,7 +42,7 @@ Into this:
 
 ## How?
 
-Install with bower: `$ bower install slamdata/purescript-jtable`
+Install with bower: `$ bower install purescript-jtable`
 
 
 ### Example Usage
