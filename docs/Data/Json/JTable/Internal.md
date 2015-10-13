@@ -6,10 +6,17 @@
 type JPath = List String
 ```
 
+#### `JTableQuery`
+
+``` purescript
+data JTableQuery a
+  = SetJson Json a
+```
+
 #### `Markup`
 
 ``` purescript
-type Markup = HTML Void
+type Markup = HTML Void (JTableQuery Unit)
 ```
 
 #### `TableStyle`

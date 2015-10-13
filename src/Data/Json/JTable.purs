@@ -1,61 +1,60 @@
-module Data.Json.JTable 
+module Data.Json.JTable
   ( renderJTable, renderJTableDef
   , jTableOptsDefault
   , inOrdering, alphaOrdering
   , noStyle, bootstrapStyle, debugStyle
+  , jtableComponent
+  , module I
   ) where
 
 import Prelude
 import Data.String (joinWith)
-import Data.Argonaut.Core (Json(..))
+import Data.Argonaut.Core (Json())
 import Data.Argonaut.JCursor (JCursor(..), JsonPrim(..), runJsonPrim)
+import Data.Const
+import Data.Void
 import Data.Json.JSemantic (toSemanticDef, JSemantic(..), renderJSemantic)
 import Data.List (fromList)
 
-import Data.Json.JTable.Internal 
+import Data.Json.JTable.Internal
+import qualified Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as I
 
-import qualified Halogen.HTML as H
-import qualified Halogen.HTML.Attributes as A
-
--- TODO: colSpan/rowSpan from number to int
-rowSpan :: forall i. Int -> A.Attr i
-rowSpan = A.attr (A.attributeName "rowSpan") <<< show
-
-colSpan :: forall i. Int -> A.Attr i
-colSpan = A.attr (A.attributeName "colSpan") <<< show
+import qualified Halogen (modify) as H
+import qualified Halogen.Component as H
+import qualified Halogen.HTML.Indexed as H
+import qualified Halogen.HTML.Properties.Indexed as P
 
 renderJsonSimple :: JsonPrim -> String
-renderJsonSimple j = renderJSemantic $  toSemanticDef j 
+renderJsonSimple j = renderJSemantic $ toSemanticDef j
 
+spans :: forall p r. Int -> Int -> Array (P.IProp (colSpan :: P.I, rowSpan :: P.I | r) p)
+spans w h =
+  (if w > 1 then [ P.colSpan w ] else [])
+    <> (if h > 1 then [ P.rowSpan h ] else [])
 
-spans w h = 
-  (if w > 1 then [ colSpan w] else [ ]) <>
-  (if h > 1 then [ rowSpan h] else [ ]) <>
-  [ ]
-                                               
 noStyle :: TableStyle
-noStyle = 
-  { table: H.table_
-  , tr:    H.tr_
-  , th:    \l _ w h -> H.th (spans w h)
-                       [ H.text l ]
-  , td:    \_ j w h -> H.td (spans w h) 
-                       [ H.text $ renderJsonSimple j ]
+noStyle =
+  { table : H.table_
+  , tr : H.tr_
+  , th : \l _ w h -> H.th (spans w h) [ H.text l ]
+  , td : \_ j w h -> H.td (spans w h) [ H.text $ renderJsonSimple j ]
   }
 
 bootstrapStyle :: TableStyle
-bootstrapStyle = noStyle { table = H.table [ A.class_ (A.className "table") ] }
+bootstrapStyle = noStyle { table = H.table [ P.class_ (H.className "table") ] }
 
 debugStyle :: TableStyle
 debugStyle = noStyle
-  { th = \_ p w h -> H.th (spans w h)
-                          [ H.text $ joinWith "." $ fromList p ]
-  , td = \c j w h -> H.td (spans w h)
-                          [ H.small [ A.class_ (A.className "grey") ]
-                            [ H.text (show c) ]
-                          , H.br_ []
-                          , H.text (show j)
-                          ]
+  { th = \_ p w h -> H.th (spans w h) [ H.text $ joinWith "." $ fromList p ]
+  , td = \c j w h ->
+           H.td
+             (spans w h)
+             [ H.small
+                 [ P.class_ (H.className "grey") ]
+                 [ H.text (show c) ]
+             , H.br_
+             , H.text $ show j
+             ]
   }
 
 inOrdering :: ColumnOrdering
@@ -65,15 +64,26 @@ alphaOrdering :: ColumnOrdering
 alphaOrdering l1 _ l2 _ = compare l1 l2
 
 jTableOptsDefault :: JTableOpts
-jTableOptsDefault = 
+jTableOptsDefault =
   { style: noStyle
   , columnOrdering: inOrdering
   , insertHeaderCells: false
   , maxTupleSize: 10
   }
-  
+
 renderJTable :: JTableOpts -> Json -> Markup
 renderJTable = renderJTableRaw
 
 renderJTableDef :: Json -> Markup
 renderJTableDef = renderJTable jTableOptsDefault
+
+jtableComponent :: forall g. JTableOpts -> H.Component Json JTableQuery g
+jtableComponent opts = H.component render eval
+  where
+    render :: H.Render Json JTableQuery
+    render = renderJTable opts
+
+    eval :: H.Eval JTableQuery Json JTableQuery g
+    eval (SetJson json next) = do
+      H.modify \_ -> json
+      pure next

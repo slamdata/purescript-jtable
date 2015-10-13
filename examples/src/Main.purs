@@ -1,60 +1,81 @@
 module Main where
 
-import Prelude 
-import Data.Void
-import Data.Tuple
+import Prelude
 import Data.Either
+import Data.Functor.Coproduct
 import Data.List (toList)
+import Data.Tuple
+import Data.Void
 
 import Control.Bind
 import Control.Monad.Eff
-import Control.Alternative
+import Control.Monad.Eff.Exception (EXCEPTION(), throwException)
+import qualified Control.Monad.Aff as Aff
+import qualified Control.Monad.Aff.AVar as Aff
+import Control.Plus
 
-import DOM
-
-import Data.DOM.Simple.Document
-import Data.DOM.Simple.Element
-import Data.DOM.Simple.Types
-import Data.DOM.Simple.Window
-
-import Data.Argonaut.Core (Json())
+import Data.Argonaut.Core (Json(), jsonEmptyArray)
 import Data.Argonaut.Parser (jsonParser)
-import Data.Json.JTable (renderJTable, jTableOptsDefault, bootstrapStyle)
+import qualified Data.Json.JTable as J
 
 import qualified Data.StrMap as StrMap
 
 import Halogen
-import Halogen.Signal
+import Halogen.Util
 import Halogen.Component
 
-import qualified Halogen.HTML as H
-import qualified Halogen.HTML.Attributes as A
-import qualified Halogen.HTML.Events as A
-import qualified Halogen.HTML.Events.Forms as A
-import qualified Halogen.HTML.CSS as C
+import qualified Halogen.HTML.Indexed as H
+import qualified Halogen.HTML.Properties.Indexed as P
+import qualified Halogen.HTML.Events.Indexed as E
 
-appendToBody :: forall eff. HTMLElement -> Eff (dom :: DOM | eff) Unit
-appendToBody e = document globalWindow >>= (body >=> flip appendChild e)
+type DemoState = String
+data DemoQuery a = SetJsonText String a
 
-ui :: forall m eff. (Alternative m) => Component m String String
-ui = render <$> (input `startingAt` "")
+type DemoSlot = Unit
+type DemoInstalledState g = InstalledState DemoState Json DemoQuery J.JTableQuery g DemoSlot
+type DemoComponent g = Component (DemoInstalledState g) (Coproduct DemoQuery (ChildF DemoSlot J.JTableQuery)) g
+type DemoRender g = RenderParent DemoState Json DemoQuery J.JTableQuery g DemoSlot
+type DemoEval g = EvalParent DemoQuery DemoState Json DemoQuery J.JTableQuery g DemoSlot
+
+ui :: forall g. (Plus g) => J.JTableOpts -> DemoComponent g
+ui opts = parentComponent' render eval (\_ -> pure unit)
   where
-  render :: String -> H.HTML (m String)
-  render json = 
-    H.div [ A.class_ (A.className "container") ]
-          [ H.h1_ [ H.text "purescript-jtable demo" ]
-          , H.p_ [ H.text "Paste some JSON:" ]
-          , H.p_ [ H.textarea [ A.class_ (A.className "form-control") 
-                              , A.value json 
-                              , A.onInput (A.input id)
-                              ] [] ]
-          , H.h2_ [ H.text "Output" ]
-          , either H.text (absurd <$>) table
-          ]
-    where
-    table :: Either String (H.HTML Void)
-    table = renderJTable (jTableOptsDefault { style = bootstrapStyle }) <$> jsonParser json
+    render :: DemoRender g
+    render jsonString =
+      H.div
+        [ P.class_ $ H.className "container" ]
+        [ H.h1_ [ H.text "purescript-jtable demo" ]
+        , H.p_ [ H.text "Paste some JSON:" ]
+        , H.p_
+            [ H.textarea
+                [ P.class_ $ H.className "form-control"
+                , P.value jsonString
+                , E.onValueInput $ E.input SetJsonText
+                ]
+            ]
+        , H.h2_ [ H.text "Output" ]
+        , H.slot unit \_ ->
+            { component : J.jtableComponent opts
+            , initialState : jsonEmptyArray
+            }
+        ]
 
-main = do
-  Tuple node _ <- runUI ui
-  appendToBody node
+    eval :: DemoEval g
+    eval (SetJsonText jsonString next) = do
+      query unit <<< action <<< J.SetJson $
+        case jsonParser jsonString of
+          Left _ -> jsonEmptyArray
+          Right json -> json
+      pure next
+
+type DemoEffects =
+  ( dom :: DOM.DOM
+  , avar :: Aff.AVAR
+  , err :: EXCEPTION
+  )
+
+main :: Eff DemoEffects Unit
+main =
+  Aff.runAff throwException (const (pure unit)) $ do
+    app <- runUI (ui J.jTableOptsDefault) (installedState "")
+    appendToBody app.node

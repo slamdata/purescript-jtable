@@ -48,4 +48,10 @@ renderJTable :: JTableOpts -> Json -> Markup
 renderJTableDef :: Json -> Markup
 ```
 
+#### `jtableComponent`
+
+``` purescript
+jtableComponent :: forall g. JTableOpts -> Component Json JTableQuery g
+```
+
 
