@@ -5,7 +5,8 @@
   "repository": "git@github.com:slamdata/purescript-jtable.git",
   "contributors": [
     "John A. De Goes <john@degoes.net> (http://degoes.net)",
-    "Marton Boros <martonboros@gmail.com> (https://github.com/brainrape)"
+    "Marton Boros <martonboros@gmail.com> (https://github.com/brainrape)",
+    "Jon Sterling <jon@jonmsterling.com> (http://www.jonmsterling.com)"
   ],
   "devDependencies": {
     "virtual-dom": "^2.0.1"
@@ -14,9 +15,9 @@
     "browserify": "^10.2.6",
     "gulp": "^3.9.0",
     "gulp-plumber": "^1.0.1",
-    "gulp-purescript": "^0.5.0",
+    "gulp-purescript": "^0.7.0",
     "gulp-run": "^1.6.8",
-    "purescript": "=0.7.2",
+    "purescript": "^0.7.4",
     "run-sequence": "^1.1.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"

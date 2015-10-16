@@ -1,4 +1,4 @@
-module Data.Json.JSemantic  
+module Data.Json.JSemantic
   ( JSemantic(..)
   , JSemanticParsers(..)
   , TimeRec(..)
@@ -14,14 +14,14 @@ import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Maybe.First (First(..), runFirst)
 import Data.Foldable (fold)
 import Data.String (split)
-import Data.String.Regex (Regex(..), regex, test, match, noFlags, parseFlags, replace)
+import Data.String.Regex (Regex(), regex, test, match, noFlags, parseFlags, replace)
 import Data.Int (fromNumber)
 import Control.MonadPlus (guard)
 import Control.Plus (empty)
 import qualified Data.Date as Date
 import qualified Data.Time as Time
 import qualified Data.List as L
-import qualified Data.Array as A 
+import qualified Data.Array as A
 import Control.Alt ((<|>))
 import Math (floor)
 
@@ -30,7 +30,7 @@ type TimeRec =
   , minutes :: Time.Minutes
   , seconds :: Time.Seconds
   , milliseconds :: Time.Milliseconds
-  } 
+  }
 
 timeRecToString :: TimeRec -> String
 timeRecToString { hours: (Time.Hours h)
@@ -38,12 +38,12 @@ timeRecToString { hours: (Time.Hours h)
                 , seconds: (Time.Seconds s)
                 , milliseconds: (Time.Milliseconds ms)
                 } =
-  
+
   show h <> ":" <> show m <> ":" <> show s <>
   (if ms > zero
    then ("." <> show ms)
    else "")
-        
+
 data JSemantic = Integral   Int
                | Fractional Number
                | Date Date.Date
@@ -103,17 +103,17 @@ renderJSemantic j = case j of
 
 
 type JSemanticParsers =
-  { boolParsers :: L.List (Boolean -> Maybe JSemantic) 
+  { boolParsers :: L.List (Boolean -> Maybe JSemantic)
   , numberParsers :: L.List (Number -> Maybe JSemantic)
   , stringParsers :: L.List (String -> Maybe JSemantic)
-  } 
+  }
 
 
 
 rx s = regex s noFlags
 rg s = regex s $ parseFlags "g"
 
-foreign import toString :: Date.Date -> String 
+foreign import toString :: Date.Date -> String
 
 foreign import s2nImpl :: (Number -> Maybe Number) -> Maybe Number -> String -> Maybe Number
 
@@ -125,7 +125,7 @@ s2n = s2nImpl Just Nothing
 currencySymbols :: String
 currencySymbols = """([\$\u20A0-\u20CF\u00A2\u00A3\u00A4\u00A5\u058F\u060B\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6])"""
 
--- the first capture group will be used 
+-- the first capture group will be used
 currencyNums :: String
 currencyNums = """(([0-9]{1,3},([0-9]{3},)*[0-9]{3}|[0-9]+)(.[0-9][0-9])?)"""
 
@@ -142,27 +142,27 @@ integralNum :: Number -> Maybe JSemantic
 integralNum n = Integral <$> fromNumber n
 
 fractionalNum :: Number -> Maybe JSemantic
-fractionalNum n = pure $ Fractional n 
+fractionalNum n = pure $ Fractional n
 
 percentString :: String -> Maybe JSemantic
 percentString str = do
   matched <- match (rx percentStr) str
-  s1 <- matched A.!! 1 
-  num <- s1 >>= s2n 
+  s1 <- matched A.!! 1
+  num <- s1 >>= s2n
   pure $ Percent num
 
 currencyLeftString :: String -> Maybe JSemantic
 currencyLeftString str = do
   matched <- match (rx $ "^" <> currencySymbols <> currencyNums <> "$") str
-  s1 <- matched A.!! 2 
+  s1 <- matched A.!! 2
   cur <- matched A.!! 1 >>= id
   num <- (replace (rg ",") "" <$> s1) >>= s2n
   pure $ Currency cur num
-  
+
 currencyRightString :: String -> Maybe JSemantic
 currencyRightString str = do
   matched <- match (rx $ "^" <> currencyNums <> currencySymbols <> "$") str
-  s1 <- matched A.!! 1 
+  s1 <- matched A.!! 1
   cur <- matched A.!! 5 >>= id
   num <- (replace (rg ",") "" <$> s1) >>= s2n
   pure $ Currency cur num
@@ -180,20 +180,21 @@ timeString str = do
               , milliseconds: ms
               }
 
-datetimeString :: String -> Maybe JSemantic
+datetimeString :: String -> Maybe Date.Date
 datetimeString str = do
   matched <- match (rx datetimeStr) str
   s1 <- matched A.!! 1 >>= id
-  DateTime <$> Date.fromString s1
+  Date.fromString s1
 
 intervalString :: String -> Maybe JSemantic
 intervalString s = do
-  let arr :: Array String
-      arr = split " - " s
-  s1 <- arr A.!! 0 
+  let
+    arr :: Array String
+    arr = split " - " s
+  s1 <- arr A.!! 0
   s2 <- arr A.!! 1
-  (DateTime d1) <- datetimeString s1
-  (DateTime d2) <- datetimeString s2
+  d1 <- datetimeString s1
+  d2 <- datetimeString s2
   pure $ Interval d1 d2
 
 integralString :: String -> Maybe JSemantic
@@ -215,18 +216,18 @@ stringParsers =
   currencyLeftString L.:
   currencyRightString L.:
   timeString L.:
-  datetimeString L.:
+  (map DateTime <<< datetimeString) L.:
   intervalString L.:
   textString L.:
-  empty 
+  empty
 
 
 defaultParsers :: JSemanticParsers
 defaultParsers =
   { boolParsers: L.singleton (pure <<< Bool)
   , numberParsers: integralNum L.: fractionalNum L.: empty
-  , stringParsers: stringParsers 
-  } 
+  , stringParsers: stringParsers
+  }
 
 
 toSemantic :: JSemanticParsers -> JsonPrim -> JSemantic
