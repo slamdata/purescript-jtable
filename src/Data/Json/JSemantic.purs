@@ -9,21 +9,21 @@ module Data.Json.JSemantic
   ) where
 
 import Prelude
-import Data.Argonaut.JCursor(JsonPrim(..), runJsonPrim)
+
+import Control.Plus (empty)
+
+import Data.Argonaut.JCursor (JsonPrim(), runJsonPrim)
+import Data.Array as A
+import Data.Date as Date
+import Data.Foldable (fold)
+import Data.Int (fromNumber)
+import Data.List ((:))
+import Data.List as L
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Maybe.First (First(..), runFirst)
-import Data.Foldable (fold)
 import Data.String (split)
-import Data.String.Regex (Regex(), regex, test, match, noFlags, parseFlags, replace)
-import Data.Int (fromNumber)
-import Control.MonadPlus (guard)
-import Control.Plus (empty)
-import qualified Data.Date as Date
-import qualified Data.Time as Time
-import qualified Data.List as L
-import qualified Data.Array as A
-import Control.Alt ((<|>))
-import Math (floor)
+import Data.String.Regex (Regex(), regex, match, noFlags, parseFlags, replace)
+import Data.Time as Time
 
 type TimeRec =
   { hours :: Time.Hours
@@ -101,16 +101,16 @@ renderJSemantic j = case j of
   (Currency c n) -> show c ++ show n
   (NA)           -> ""
 
-
 type JSemanticParsers =
   { boolParsers :: L.List (Boolean -> Maybe JSemantic)
   , numberParsers :: L.List (Number -> Maybe JSemantic)
   , stringParsers :: L.List (String -> Maybe JSemantic)
   }
 
-
-
+rx :: String -> Regex
 rx s = regex s noFlags
+
+rg :: String -> Regex
 rg s = regex s $ parseFlags "g"
 
 foreign import toString :: Date.Date -> String
@@ -119,7 +119,6 @@ foreign import s2nImpl :: (Number -> Maybe Number) -> Maybe Number -> String -> 
 
 s2n :: String -> Maybe Number
 s2n = s2nImpl Just Nothing
-
 
 -- source: http://www.fileformat.info/info/unicode/category/Sc/list.htm
 currencySymbols :: String
@@ -203,32 +202,28 @@ integralString s = Integral <$> (s2n s >>= fromNumber)
 fractionalString :: String -> Maybe JSemantic
 fractionalString s = Fractional <$> s2n s
 
-
 textString :: String -> Maybe JSemantic
 textString s = pure $ Text s
 
-
 stringParsers :: L.List (String -> Maybe JSemantic)
-stringParsers =
-  integralString L.:
-  fractionalString L.:
-  percentString L.:
-  currencyLeftString L.:
-  currencyRightString L.:
-  timeString L.:
-  (map DateTime <<< datetimeString) L.:
-  intervalString L.:
-  textString L.:
-  empty
-
+stringParsers
+  = integralString
+  : fractionalString
+  : percentString
+  : currencyLeftString
+  : currencyRightString
+  : timeString
+  : (map DateTime <<< datetimeString)
+  : intervalString
+  : textString
+  : empty
 
 defaultParsers :: JSemanticParsers
 defaultParsers =
   { boolParsers: L.singleton (pure <<< Bool)
-  , numberParsers: integralNum L.: fractionalNum L.: empty
+  , numberParsers: integralNum : fractionalNum : empty
   , stringParsers: stringParsers
   }
-
 
 toSemantic :: JSemanticParsers -> JsonPrim -> JSemantic
 toSemantic o p = runJsonPrim p
@@ -243,4 +238,3 @@ toSemantic o p = runJsonPrim p
 
 toSemanticDef :: JsonPrim -> JSemantic
 toSemanticDef = toSemantic defaultParsers
-

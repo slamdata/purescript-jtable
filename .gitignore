@@ -1,9 +1,7 @@
-/output/
-/node_modules/
+/.*
+!/.gitignore
+!/.travis.yml
 /bower_components/
-/tmp/
 /node_modules/
-/dist/
-/examples/jtable.js
-.psci
-.psci_modules
+/output/
+/tmp/

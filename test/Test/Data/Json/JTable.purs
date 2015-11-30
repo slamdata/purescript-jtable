@@ -1,29 +1,25 @@
 module Test.Data.Json.JTable where
 
 import Prelude
+
 import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Console
-import Control.Monad.Eff.Exception (EXCEPTION())
-import Control.Monad.Eff.Random (RANDOM())
-import Data.Foldable (for_)
+
 import Data.Argonaut.Core (Json(), JArray())
 import Data.Argonaut.JCursor (primToJson, primNull)
+import Data.Foldable (for_)
 import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
-import Data.Json.JTable.Internal (renderJTableRaw, Markup())
-import Data.Void
-import Test.StrongCheck
-import qualified Halogen.HTML.Renderer.String as H
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
+import Data.Json.JTable.Internal (Markup())
 
-type TestEffects e =
-  ( err :: EXCEPTION
-  , random :: RANDOM
-  , console :: CONSOLE
-  | e
-  )
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Renderer.String as H
 
+import Test.StrongCheck (assert, (<?>))
+import Test.Data.Json.TestEffects (TestEffects())
+
+jNull :: Json
 jNull = primToJson primNull
+
 foreign import j0 :: Json
 foreign import jTup2 :: Json
 foreign import jATup2 :: JArray
@@ -44,7 +40,6 @@ foreign import jObj2EArr :: Json
 foreign import jObjWeird :: Json
 foreign import jArrObj2Tups :: Json
 foreign import jMergeObjTup :: Json
-
 
 type TestCase =
   { json :: Json
@@ -256,7 +251,7 @@ headerCellAssertion {json: json, msg: msg, html: html} = do
       errorMsg = "special assertion" <> msg <> "\nactual: " <> actual <> "\nexpected: " <> expected
   assert ((actual == expected) <?> errorMsg)
 
+main :: forall eff. Eff (TestEffects eff) Unit
 main = do
   for_ cases assertion
   headerCellAssertion insertedCase
-

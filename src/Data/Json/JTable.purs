@@ -8,21 +8,20 @@ module Data.Json.JTable
   ) where
 
 import Prelude
-import Data.String (joinWith)
+
 import Data.Argonaut.Core (Json())
-import Data.Argonaut.JCursor (JCursor(..), JsonPrim(..), runJsonPrim)
-import Data.Const
-import Data.Void
-import Data.Json.JSemantic (toSemanticDef, JSemantic(..), renderJSemantic)
-import Data.List (fromList)
-
+import Data.Argonaut.JCursor (JsonPrim())
+import Data.Functor (($>))
+import Data.Json.JSemantic (toSemanticDef, renderJSemantic)
 import Data.Json.JTable.Internal
-import qualified Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as I
+import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as I
+import Data.List (fromList)
+import Data.String (joinWith)
 
-import qualified Halogen (modify) as H
-import qualified Halogen.Component as H
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
+import Halogen (modify) as H
+import Halogen.Component as H
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
 
 renderJsonSimple :: JsonPrim -> String
 renderJsonSimple j = renderJSemantic $ toSemanticDef j
@@ -80,10 +79,8 @@ renderJTableDef = renderJTable jTableOptsDefault
 jtableComponent :: forall g. JTableOpts -> H.Component Json JTableQuery g
 jtableComponent opts = H.component render eval
   where
-    render :: H.Render Json JTableQuery
-    render = renderJTable opts
+  render :: H.Render Json JTableQuery
+  render = renderJTable opts
 
-    eval :: H.Eval JTableQuery Json JTableQuery g
-    eval (SetJson json next) = do
-      H.modify \_ -> json
-      pure next
+  eval :: H.Eval JTableQuery Json JTableQuery g
+  eval (SetJson json next) = H.modify (const json) $> next

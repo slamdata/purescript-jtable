@@ -1,29 +1,32 @@
 module Test.Data.Json.JSemantic where
 
 import Prelude
-import Data.Maybe
-import Data.Argonaut.Core
-import Data.Argonaut.JCursor
-import Data.Json.JSemantic
-import Control.Monad.Eff.Console 
 
-import qualified Data.Date as D
-import Data.Time (Hours(..), Minutes(..), Seconds(..), Milliseconds(..))
-import Data.Argonaut.JCursor
-import Test.StrongCheck
+import Control.Monad.Eff (Eff())
+import Control.Monad.Eff.Console
+
+import Data.Argonaut.JCursor (JsonPrim(), primNull, primNum, primBool, primStr)
+import Data.Date as D
+import Data.Json.JSemantic (JSemantic(..), toSemanticDef)
 import Data.Maybe.Unsafe (fromJust)
+import Data.Time (Hours(..), Minutes(..), Seconds(..), Milliseconds(..))
 
+import Test.StrongCheck (assert, (<?>))
+import Test.Data.Json.TestEffects (TestEffects())
 
+assertion
+  :: forall eff
+   . String
+  -> JsonPrim
+  -> JSemantic
+  -> Eff (TestEffects eff) Unit
 assertion msg prim expected = do
   log msg
   let actual = toSemanticDef prim
       errMsg = "expected: " <> show expected <> "\nactual: " <> show actual
   assert ((toSemanticDef prim == expected) <?> errMsg)
 
-d1 = "1981-04-01T06:55:00+02:00"
-d2 = "2022-12-31T07:14:00+01:00"
-i = d1 <> " - " <> d2
-
+main :: forall eff. Eff (TestEffects eff) Unit
 main = do
   assertion "null" primNull NA
   assertion "integral positive" (primNum 17.0) (Integral 17)
@@ -63,3 +66,8 @@ main = do
           , milliseconds: Milliseconds 123.0
           })
   assertion "incorrect time 56:12:12" (primStr "56:12:12") (Text "56:12:12")
+
+  where
+  d1 = "1981-04-01T06:55:00+02:00"
+  d2 = "2022-12-31T07:14:00+01:00"
+  i = d1 <> " - " <> d2
