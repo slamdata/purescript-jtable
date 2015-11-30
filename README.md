@@ -1,5 +1,9 @@
 # purescript-jtable
 
+[![Latest release](http://img.shields.io/bower/v/purescript-jtable.svg)](https://github.com/slamdata/purescript-jtable/releases)
+[![Build Status](https://travis-ci.org/slamdata/purescript-jtable.svg?branch=master)](https://travis-ci.org/slamdata/purescript-jtable)
+[![Dependency Status](https://www.versioneye.com/user/projects/565c3fb34052e80035000053/badge.svg?style=flat)](https://www.versioneye.com/user/projects/565c3fb34052e80035000053)
+
 A small but powerful Purescript library to render arbitrary JSON into HTML tables.
 
 Turn this:
@@ -40,23 +44,18 @@ Into this:
 ```
 
 
-## How?
+## Installation
 
-Install with bower: `$ bower install purescript-jtable`
+```
+bower install purescript-jtable
+```
 
 
-### Example Usage
+## Example
 
 See [examples/src/Main.purs](examples/src/Main.purs) for example usage.
 
 
-### API
+## Documentation
 
-See [MODULES.md](MODULES.md).
-
-The `Json` and `JCursor` data types that appear in the API are from
-[purescript-argonaut](https://github.com/purescript-contrib/purescript-argonaut).
-The `Markup` data type that appears in the API is a synonym for `HTML _ _`
-from [purescript-halogen](https://github.com/slamdata/purescript-halogen).
-
-Both of these libraries are listed as dependencies in [bower.json](bower.json).
+Module documentation is published on Pursuit: [http://pursuit.purescript.org/packages/purescript-jtable](http://pursuit.purescript.org/packages/purescript-jtable)

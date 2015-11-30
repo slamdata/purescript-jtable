@@ -42,18 +42,6 @@ var exampleForeigns = [
     'example/src/**/*.js'
 ];
 
-gulp.task('docs', function() {
-    return purescript.pscDocs({
-        src: sources,
-        docgen: {
-            "Data.Json.JSemantic": "docs/Data/Json/JSemantic.md",
-            "Data.Json.JTable": "docs/Data/Json/JTable.md",
-            "Data.Json.JTable.Internal": "docs/Data/Json/JTable/Internal.md"
-        }
-    });
-});
-
-
 gulp.task('make', function() {
     return purescript.psc({
         src: sources,
@@ -101,11 +89,11 @@ gulp.task('example-browserify', ['example-bundle'], function() {
         entries: ['dist/example.js'],
         paths: ['node_modules']
     })
-        .bundle()
+    .bundle()
         .pipe(plumber())
         .pipe(source('jtable.js'))
         .pipe(buffer())
         .pipe(gulp.dest('examples'));
 });
 
-gulp.task("default", sequence("make", "docs"));
+gulp.task("default", sequence("make"));
