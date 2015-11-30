@@ -2,13 +2,14 @@ language: node_js
 node_js:
   - 4
 install:
+  - npm install bower -g
   - npm install
 script:
   - npm test
 after_success:
 - >-
   test $TRAVIS_TAG &&
-  node_modules/.bin/psc-publish > .pursuit.json &&
+  ./node_modules/.bin/psc-publish > .pursuit.json &&
   curl -X POST http://pursuit.purescript.org/packages \
     -d @.pursuit.json \
     -H 'Accept: application/json' \
