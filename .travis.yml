@@ -2,10 +2,9 @@ language: node_js
 node_js:
   - 4
 install:
-  - npm install bower gulp phantomjs -g
-  - npm install && bower install
+  - npm install
 script:
-  - gulp test --psc-rts-opts -N4
+  - npm test
 after_success:
 - >-
   test $TRAVIS_TAG &&
