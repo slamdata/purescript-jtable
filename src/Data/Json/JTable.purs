@@ -70,10 +70,10 @@ jTableOptsDefault =
   , maxTupleSize: 10
   }
 
-renderJTable :: JTableOpts -> Json -> Markup
+renderJTable :: forall f. JTableOpts -> Json -> Markup f
 renderJTable = renderJTableRaw
 
-renderJTableDef :: Json -> Markup
+renderJTableDef :: forall f. Json -> Markup f
 renderJTableDef = renderJTable jTableOptsDefault
 
 jtableComponent :: forall g. JTableOpts -> H.Component Json JTableQuery g
