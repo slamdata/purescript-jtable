@@ -66,13 +66,13 @@ runCell :: Cell -> CellRec
 runCell (Cell c) = c
 
 data JTableQuery a = SetJson Json a
-type Markup = H.HTML Void (JTableQuery Unit)
+type Markup f = H.HTML Void (f Unit)
 
 type TableStyle =
-  { table :: Array Markup -> Markup
-  , tr    :: Array Markup -> Markup
-  , th    :: String -> JPath -> Int -> Int -> Markup
-  , td    :: JC.JCursor -> JC.JsonPrim -> Int -> Int -> Markup
+  { table :: forall f. Array (Markup f) -> Markup f
+  , tr    :: forall f. Array (Markup f) -> Markup f
+  , th    :: forall f. String -> JPath -> Int -> Int -> Markup f
+  , td    :: forall f. JC.JCursor -> JC.JsonPrim -> Int -> Int -> Markup f
   }
 
 type ColumnOrdering = String -> JPath -> String -> JPath -> Ordering
@@ -94,7 +94,7 @@ toPrim = foldJsonPrim Just (const Nothing) (const Nothing)
 enumerate :: forall a. List a -> List (Tuple a Int)
 enumerate xs = L.zipWith Tuple xs (L.range zero $ (L.length xs - one))
 
-renderJTableRaw :: JTableOpts -> Json -> Markup
+renderJTableRaw :: forall f. JTableOpts -> Json -> Markup f
 renderJTableRaw o json =
   o.style.table
     [ renderThead o.style.tr o.style.th padded
@@ -137,11 +137,11 @@ sortTree ord (Tree t) = Tree $ t {children = L.sortBy sortFn $ (sortTree ord <$>
       ord t1.label t1.path t2.label t2.path
 
 renderRows
-  :: forall a
-   . (Array Markup -> Markup)
-  -> (Int -> Int -> a -> Markup)
+  :: forall a f
+   . (Array (Markup f) -> Markup f)
+  -> (Int -> Int -> a -> Markup f)
   -> List (List a)
-  -> Array Markup
+  -> Array (Markup f)
 renderRows tr cellf rows = fromList do
   Tuple row y <- fromList $ enumerate rows
   return $ tr do
@@ -155,13 +155,14 @@ tablesToRows ts =
   else L.Cons ts (tablesToRows (ts >>= runTree >>> _.children))
 
 renderThead
-  :: (Array Markup -> Markup)
-  -> (String -> JPath -> Int -> Int -> Markup)
+  :: forall f
+   . (Array (Markup f) -> Markup f)
+  -> (String -> JPath -> Int -> Int -> Markup f)
   -> Tree
-  -> Markup
+  -> Markup f
 renderThead tr thf (Tree t) = H.thead_ $ renderRows tr tdf' $ tablesToRows t.children
   where
-    tdf' :: Int -> Int -> Tree -> Markup
+    tdf' :: Int -> Int -> Tree -> Markup f
     tdf' y x (Tree t) = thf t.label t.path t.width (height y t.children)
 
     height :: Int -> List Tree -> Int
@@ -171,14 +172,15 @@ renderThead tr thf (Tree t) = H.thead_ $ renderRows tr tdf' $ tablesToRows t.chi
       else one
 
 renderTBody
-  :: (Array Markup -> Markup)
-  -> (JC.JCursor -> JC.JsonPrim -> Int -> Int -> Markup)
+  :: forall f
+   . (Array (Markup f) -> Markup f)
+  -> (JC.JCursor -> JC.JsonPrim -> Int -> Int -> Markup f)
   -> Tree
   -> Table
-  -> Markup
+  -> Markup f
 renderTBody tr tdf (Tree t) table = H.tbody_ (renderRows tr tdf' table)
   where
-    tdf' :: Int -> Int -> Cell -> Markup
+    tdf' :: Int -> Int -> Cell -> Markup f
     tdf' _ _ (Cell c) = tdf c.cursor c.json c.width c.height
 
 treeFromJson :: Int -> String -> JPath -> Json -> Tree

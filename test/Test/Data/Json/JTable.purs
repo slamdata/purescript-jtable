@@ -6,9 +6,11 @@ import Control.Monad.Eff (Eff())
 
 import Data.Argonaut.Core (Json(), JArray())
 import Data.Argonaut.JCursor (primToJson, primNull)
+import Data.Const (Const())
 import Data.Foldable (for_)
 import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
 import Data.Json.JTable.Internal (Markup())
+import Data.Void (Void())
 
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
@@ -43,7 +45,7 @@ foreign import jMergeObjTup :: Json
 
 type TestCase =
   { json :: Json
-  , html :: Markup
+  , html :: Markup (Const Void)
   , msg :: String
   }
 
