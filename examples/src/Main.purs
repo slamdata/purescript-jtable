@@ -1,72 +1,65 @@
 module Main where
 
 import Prelude
-import Data.Either
-import Data.Functor.Coproduct
-import Data.List (toList)
-import Data.Tuple
-import Data.Void
 
-import Control.Bind
-import Control.Monad.Eff
-import Control.Monad.Eff.Exception (EXCEPTION(), throwException)
-import qualified Control.Monad.Aff as Aff
-import qualified Control.Monad.Aff.AVar as Aff
-import Control.Plus
+import Control.Bind ((=<<))
+import Control.Monad.Aff.AVar as Aff
+import Control.Monad.Eff (Eff())
+import Control.Monad.Eff.Exception (EXCEPTION())
 
 import Data.Argonaut.Core (Json(), jsonEmptyArray)
 import Data.Argonaut.Parser (jsonParser)
-import qualified Data.Json.JTable as J
+import Data.Either (Either(..))
+import Data.Functor.Coproduct (Coproduct())
+import Data.Json.JTable as J
+import Data.Maybe (Maybe(..))
+import Data.NaturalTransformation (Natural())
 
-import qualified Data.StrMap as StrMap
-
-import Halogen
-import Halogen.Util
-import Halogen.Component
-
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
-import qualified Halogen.HTML.Events.Indexed as E
+import Halogen as H
+import Halogen.HTML.Events.Indexed as HE
+import Halogen.HTML.Indexed as HH
+import Halogen.HTML.Properties.Indexed as HP
+import Halogen.Util (runHalogenAff, awaitBody)
 
 type DemoState = String
 data DemoQuery a = SetJsonText String a
 
 type DemoSlot = Unit
-type DemoInstalledState g = InstalledState DemoState Json DemoQuery J.JTableQuery g DemoSlot
-type DemoComponent g = Component (DemoInstalledState g) (Coproduct DemoQuery (ChildF DemoSlot J.JTableQuery)) g
-type DemoRender g = RenderParent DemoState Json DemoQuery J.JTableQuery g DemoSlot
-type DemoEval g = EvalParent DemoQuery DemoState Json DemoQuery J.JTableQuery g DemoSlot
+type DemoInstalledState g = H.ParentState DemoState Json DemoQuery J.JTableQuery g DemoSlot
+type DemoComponent g = H.Component (DemoInstalledState g) (Coproduct DemoQuery (H.ChildF DemoSlot J.JTableQuery)) g
+type DemoRender g = DemoState -> H.ParentHTML Json DemoQuery J.JTableQuery g DemoSlot
+type DemoEval g = Natural DemoQuery (H.ParentDSL DemoState Json DemoQuery J.JTableQuery g DemoSlot)
 
-ui :: forall g. (Plus g) => J.JTableOpts -> DemoComponent g
-ui opts = parentComponent' render eval (\_ -> pure unit)
+ui :: forall g. (Functor g) => J.JTableOpts -> DemoComponent g
+ui opts = H.parentComponent { render, eval, peek: Nothing }
   where
-    render :: DemoRender g
-    render jsonString =
-      H.div
-        [ P.class_ $ H.className "container" ]
-        [ H.h1_ [ H.text "purescript-jtable demo" ]
-        , H.p_ [ H.text "Paste some JSON:" ]
-        , H.p_
-            [ H.textarea
-                [ P.class_ $ H.className "form-control"
-                , P.value jsonString
-                , E.onValueInput $ E.input SetJsonText
-                ]
-            ]
-        , H.h2_ [ H.text "Output" ]
-        , H.slot unit \_ ->
-            { component : J.jtableComponent opts
-            , initialState : jsonEmptyArray
-            }
-        ]
+  render :: DemoRender g
+  render jsonString =
+    HH.div
+      [ HP.class_ $ HH.className "container" ]
+      [ HH.h1_ [ HH.text "purescript-jtable demo" ]
+      , HH.p_ [ HH.text "Paste some JSON:" ]
+      , HH.p_
+          [ HH.textarea
+              [ HP.class_ $ HH.className "form-control"
+              , HP.value jsonString
+              , HE.onValueInput $ HE.input SetJsonText
+              ]
+          ]
+      , HH.h2_ [ HH.text "Output" ]
+      , HH.slot unit \_ ->
+          { component : J.jtableComponent opts
+          , initialState : jsonEmptyArray
+          }
+      ]
 
-    eval :: DemoEval g
-    eval (SetJsonText jsonString next) = do
-      query unit <<< action <<< J.SetJson $
-        case jsonParser jsonString of
-          Left _ -> jsonEmptyArray
-          Right json -> json
-      pure next
+  eval :: DemoEval g
+  eval (SetJsonText jsonString next) = do
+    H.query unit <<< H.action <<< J.SetJson $
+      case jsonParser jsonString of
+        Left _ -> jsonEmptyArray
+        Right json -> json
+    pure next
 
 type DemoEffects =
   ( dom :: DOM.DOM
@@ -75,7 +68,5 @@ type DemoEffects =
   )
 
 main :: Eff DemoEffects Unit
-main =
-  Aff.runAff throwException (const (pure unit)) $ do
-    app <- runUI (ui J.jTableOptsDefault) (installedState "")
-    appendToBody app.node
+main = runHalogenAff $
+  H.runUI (ui J.jTableOptsDefault) (H.parentState "") =<< awaitBody

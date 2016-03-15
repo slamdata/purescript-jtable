@@ -1,14 +1,17 @@
 {
   "private": true,
   "scripts": {
-    "postinstall": "pulp dep install",
-    "test": "pulp test"
+    "clean": "rimraf output && rimraf .pulp-cache",
+    "build": "pulp build",
+    "test": "pulp test",
+    "example": "pulp browserify --include examples/src --to examples/jtable.js"
   },
   "devDependencies": {
-    "pulp": "^5.0.2",
-    "purescript": "^0.7.6"
+    "pulp": "^8.1.0",
+    "purescript": "^0.7.6",
+    "rimraf": "^2.5.2"
   },
   "dependencies": {
-    "virtual-dom": "^2.0.1"
+    "virtual-dom": "^2.1.1"
   }
 }
