@@ -16,6 +16,7 @@ import Data.Json.JSemantic (toSemanticDef, renderJSemantic)
 import Data.Json.JTable.Internal
 import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as I
 import Data.List (fromList)
+import Data.NaturalTransformation (Natural())
 import Data.String (joinWith)
 
 import Halogen (modify) as H
@@ -77,10 +78,10 @@ renderJTableDef :: forall f. Json -> Markup f
 renderJTableDef = renderJTable jTableOptsDefault
 
 jtableComponent :: forall g. JTableOpts -> H.Component Json JTableQuery g
-jtableComponent opts = H.component render eval
+jtableComponent opts = H.component { render, eval }
   where
-  render :: H.Render Json JTableQuery
+  render :: Json -> H.ComponentHTML JTableQuery
   render = renderJTable opts
 
-  eval :: H.Eval JTableQuery Json JTableQuery g
+  eval :: Natural JTableQuery (H.ComponentDSL Json JTableQuery g)
   eval (SetJson json next) = H.modify (const json) $> next
