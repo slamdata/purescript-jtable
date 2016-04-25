@@ -4,7 +4,7 @@ module Data.Json.JTable
   , inOrdering, alphaOrdering
   , noStyle, bootstrapStyle, debugStyle
   , jtableComponent
-  , module I
+  , module Reexports
   ) where
 
 import Prelude
@@ -13,15 +13,15 @@ import Data.Argonaut.Core (Json())
 import Data.Argonaut.JCursor (JsonPrim())
 import Data.Functor (($>))
 import Data.Json.JSemantic (toSemanticDef, renderJSemantic)
-import Data.Json.JTable.Internal
-import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as I
+import Data.Json.JTable.Internal as JT
+import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as Reexports
 import Data.List (fromList)
 import Data.NaturalTransformation (Natural())
 import Data.String (joinWith)
 
-import Halogen (modify) as H
-import Halogen.Component as H
-import Halogen.HTML.Indexed as H
+import Halogen as H
+import Halogen.Component as HC
+import Halogen.HTML.Indexed as HI
 import Halogen.HTML.Properties.Indexed as P
 
 renderJsonSimple :: JsonPrim -> String
@@ -32,38 +32,38 @@ spans w h =
   (if w > 1 then [ P.colSpan w ] else [])
     <> (if h > 1 then [ P.rowSpan h ] else [])
 
-noStyle :: TableStyle
+noStyle :: JT.TableStyle
 noStyle =
-  { table : H.table_
-  , tr : H.tr_
-  , th : \l _ w h -> H.th (spans w h) [ H.text l ]
-  , td : \_ j w h -> H.td (spans w h) [ H.text $ renderJsonSimple j ]
+  { table : HI.table_
+  , tr : HI.tr_
+  , th : \l _ w h -> HI.th (spans w h) [ HI.text l ]
+  , td : \_ j w h -> HI.td (spans w h) [ HI.text $ renderJsonSimple j ]
   }
 
-bootstrapStyle :: TableStyle
-bootstrapStyle = noStyle { table = H.table [ P.class_ (H.className "table") ] }
+bootstrapStyle :: JT.TableStyle
+bootstrapStyle = noStyle { table = HI.table [ P.class_ (HI.className "table") ] }
 
-debugStyle :: TableStyle
+debugStyle :: JT.TableStyle
 debugStyle = noStyle
-  { th = \_ p w h -> H.th (spans w h) [ H.text $ joinWith "." $ fromList p ]
+  { th = \_ p w h -> HI.th (spans w h) [ HI.text $ joinWith "." $ fromList p ]
   , td = \c j w h ->
-           H.td
+           HI.td
              (spans w h)
-             [ H.small
-                 [ P.class_ (H.className "grey") ]
-                 [ H.text (show c) ]
-             , H.br_
-             , H.text $ show j
+             [ HI.small
+                 [ P.class_ (HI.className "grey") ]
+                 [ HI.text (show c) ]
+             , HI.br_
+             , HI.text $ show j
              ]
   }
 
-inOrdering :: ColumnOrdering
+inOrdering :: JT.ColumnOrdering
 inOrdering _ _ _ _ = EQ
 
-alphaOrdering :: ColumnOrdering
+alphaOrdering :: JT.ColumnOrdering
 alphaOrdering l1 _ l2 _ = compare l1 l2
 
-jTableOptsDefault :: JTableOpts
+jTableOptsDefault :: JT.JTableOpts
 jTableOptsDefault =
   { style: noStyle
   , columnOrdering: inOrdering
@@ -71,17 +71,17 @@ jTableOptsDefault =
   , maxTupleSize: 10
   }
 
-renderJTable :: forall f. JTableOpts -> Json -> Markup f
-renderJTable = renderJTableRaw
+renderJTable :: forall f. JT.JTableOpts -> Json -> JT.Markup f
+renderJTable = JT.renderJTableRaw
 
-renderJTableDef :: forall f. Json -> Markup f
+renderJTableDef :: forall f. Json -> JT.Markup f
 renderJTableDef = renderJTable jTableOptsDefault
 
-jtableComponent :: forall g. JTableOpts -> H.Component Json JTableQuery g
-jtableComponent opts = H.component { render, eval }
+jtableComponent :: forall g. JT.JTableOpts -> HC.Component Json JT.JTableQuery g
+jtableComponent opts = HC.component { render, eval }
   where
-  render :: Json -> H.ComponentHTML JTableQuery
+  render :: Json -> HC.ComponentHTML JT.JTableQuery
   render = renderJTable opts
 
-  eval :: Natural JTableQuery (H.ComponentDSL Json JTableQuery g)
-  eval (SetJson json next) = H.modify (const json) $> next
+  eval :: Natural JT.JTableQuery (HC.ComponentDSL Json JT.JTableQuery g)
+  eval (JT.SetJson json next) = H.modify (const json) $> next
