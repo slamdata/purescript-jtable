@@ -234,7 +234,7 @@ toSemantic o p = runJsonPrim p
   where
   applyParsers :: forall a. L.List (a -> Maybe JSemantic) -> a -> JSemantic
   applyParsers lst a =
-    fromMaybe NA $ runFirst $ fold (First <$> (($ a) <$> lst))
+    fromMaybe NA $ runFirst $ fold (First <$> ((_ $ a) <$> lst))
 
 toSemanticDef :: JsonPrim -> JSemantic
 toSemanticDef = toSemantic defaultParsers
