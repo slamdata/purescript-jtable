@@ -1,31 +1,30 @@
 module Data.Json.JTable.Internal
   ( renderJTableRaw
-  , JTableOpts()
-  , ColumnOrdering()
-  , TableStyle()
-  , JPath()
+  , JTableOpts
+  , ColumnOrdering
+  , TableStyle
+  , JPath
   , JTableQuery(..)
-  , Markup()
+  , Markup
   ) where
 
-import Prelude
+import Prelude hiding (max)
 
 import Control.Alt ((<|>))
 import Control.MonadPlus (guard)
 
-import Data.Argonaut.Core (Json())
+import Data.Argonaut.Core (Json)
 import Data.Argonaut.Core as JSON
 import Data.Argonaut.JCursor as JC
 import Data.Array as A
 import Data.Foldable (foldl, elem)
+import Data.List (List, (!!))
 import Data.List as L
-import Data.List (List(), (!!), toList, fromList)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Monoid (mempty)
 import Data.StrMap as M
 import Data.Traversable (for)
 import Data.Tuple (Tuple(..), snd)
-import Data.Void (Void())
 
 import Halogen.HTML as H
 
@@ -92,7 +91,7 @@ toPrim :: Json -> Maybe JC.JsonPrim
 toPrim = foldJsonPrim Just (const Nothing) (const Nothing)
 
 enumerate :: forall a. List a -> List (Tuple a Int)
-enumerate xs = L.zipWith Tuple xs (L.range zero $ (L.length xs - one))
+enumerate xs = L.zipWith Tuple xs (L.range 0 $ (L.length xs - 1))
 
 renderJTableRaw :: forall f. JTableOpts -> Json -> Markup f
 renderJTableRaw o json =
@@ -120,13 +119,13 @@ renderJTableRaw o json =
 padTree :: Int -> Tree -> Tree
 padTree maxh tree@(Tree t) =
   if not $ L.null t.children
-  then Tree $ t { children = padTree (maxh - one) <$> t.children }
+  then Tree $ t { children = padTree (maxh - 1) <$> t.children }
   else
     if maxh < 1
-    then Tree $ t{ height = one }
+    then Tree $ t{ height = 1 }
     else Tree $ t{ label = mempty
-                 , height = one
-                 , children = L.singleton $ padTree (maxh - one) (Tree t)
+                 , height = 1
+                 , children = L.singleton $ padTree (maxh - 1) (Tree t)
                  }
 
 sortTree :: ColumnOrdering -> Tree -> Tree
@@ -142,11 +141,11 @@ renderRows
   -> (Int -> Int -> a -> Markup f)
   -> List (List a)
   -> Array (Markup f)
-renderRows tr cellf rows = fromList do
-  Tuple row y <- fromList $ enumerate rows
-  return $ tr do
-    Tuple cell x <- fromList $ enumerate row
-    return $ cellf y x cell
+renderRows tr cellf rows = A.fromFoldable do
+  Tuple row y <- A.fromFoldable $ enumerate rows
+  pure $ tr do
+    Tuple cell x <- A.fromFoldable $ enumerate row
+    pure $ cellf y x cell
 
 tablesToRows :: List Tree -> List (List Tree)
 tablesToRows ts =
@@ -169,7 +168,7 @@ renderThead tr thf (Tree t) = H.thead_ $ renderRows tr tdf' $ tablesToRows t.chi
     height i k =
       if L.null k
       then t.height - i
-      else one
+      else 1
 
 renderTBody
   :: forall f
@@ -187,10 +186,10 @@ treeFromJson :: Int -> String -> JPath -> Json -> Tree
 treeFromJson maxTupleSize label path = foldJsonPrim (const prim) array obj
   where
     tree :: TreeRec
-    tree = { label: label
-           , path: path
-           , width: one
-           , height: zero
+    tree = { label
+           , path
+           , width: 1
+           , height: 0
            , children: mempty
            }
 
@@ -215,21 +214,21 @@ treeFromJson maxTupleSize label path = foldJsonPrim (const prim) array obj
         childrenWidth =
           case (L.nub $ (runTree >>> _.width) <$> ts) of
             L.Cons tsw L.Nil -> tsw
-            _ -> one
+            _ -> 1
 
 
         t :: TreeRec
-        t = runTree $ foldl mergeTrees (Tree $ tree {height = zero}) $ ts >>= runTree >>> _.children
+        t = runTree $ foldl mergeTrees (Tree $ tree { height = 0 }) $ ts >>= runTree >>> _.children
 
         ts :: List Tree
-        ts = toList $ treeFromJson maxTupleSize label path <$> ja
+        ts = L.fromFoldable $ treeFromJson maxTupleSize label path <$> ja
 
 
     obj :: JSON.JObject -> Tree
     obj jo =
       if M.isEmpty jo
       then Tree tree
-      else Tree $ tree {width = width, height = height, children = children }
+      else Tree $ tree { width = width, height = height, children = children }
 
       where
         assocToTree :: JSON.JAssoc -> Tree
@@ -240,10 +239,10 @@ treeFromJson maxTupleSize label path = foldJsonPrim (const prim) array obj
         children = assocToTree <$> M.toList jo
 
         width :: Int
-        width = foldl (+) zero $ (runTree >>> _.width) <$> children
+        width = foldl (+) 0 $ (runTree >>> _.width) <$> children
 
         height :: Int
-        height = one + (foldl (+) zero $ (runTree >>> _.height) <$> children)
+        height = 1 + (foldl (+) 0 $ (runTree >>> _.height) <$> children)
 
 widthOfPrimTuple :: Int -> JPath -> JSON.JArray -> Maybe Int
 widthOfPrimTuple maxTupleSize path ja = do
@@ -271,7 +270,7 @@ mergeTrees (Tree t) (Tree nt) = maybe notChild go $ i >>= \ix -> t.children !! i
           else t.width + nt.width
 
         height :: Int
-        height = max t.height (nt.height + one)
+        height = max t.height (nt.height + 1)
 
         children :: List Tree
         children = L.snoc t.children (Tree nt)
@@ -283,7 +282,7 @@ mergeTrees (Tree t) (Tree nt) = maybe notChild go $ i >>= \ix -> t.children !! i
         width = t.width - child.width + maxDescendantWidth
 
         height :: Int
-        height = max t.height (subChild.height + one)
+        height = max t.height (subChild.height + 1)
 
         children :: List Tree
         children =
@@ -298,7 +297,7 @@ mergeTrees (Tree t) (Tree nt) = maybe notChild go $ i >>= \ix -> t.children !! i
         maxDescendantWidth =
           max subChild.width
             if L.null nt.children && not (L.null subChild.children)
-            then one
+            then 1
             else nt.width
 
 
@@ -312,7 +311,7 @@ mkTable maxTupleSize (Tree t) c = foldJsonPrim prim array obj
       else Nothing
 
     prim :: JC.JsonPrim -> Table
-    prim jp = L.singleton $ L.singleton $ Cell { cursor: c, width: t.width, height: one, json: jp }
+    prim jp = L.singleton $ L.singleton $ Cell { cursor: c, width: t.width, height: 1, json: jp }
 
     array :: JSON.JArray -> Table
     array ja = fromMaybe (jarr ja) $ tuple ja
@@ -323,13 +322,13 @@ mkTable maxTupleSize (Tree t) c = foldJsonPrim prim array obj
     primtup :: JSON.JArray -> Maybe Table
     primtup ja = do
       width ja
-      pure $ L.singleton $ mkCells <$> (L.range zero (t.width - one))
+      pure $ L.singleton $ mkCells <$> (L.range 0 (t.width - 1))
       where
         mkCells :: Int -> Cell
         mkCells i =
           Cell { cursor: JC.downIndex i c
-               , width: one
-               , height: one
+               , width: 1
+               , height: 1
                , json: fromMaybe JC.primNull (ja A.!! i >>= toPrim)
                }
 
@@ -338,13 +337,13 @@ mkTable maxTupleSize (Tree t) c = foldJsonPrim prim array obj
 
     jarr :: JSON.JArray -> Table
     jarr ja = do
-      Tuple j i <- enumerate $ toList ja
+      Tuple j i <- enumerate $ L.fromFoldable ja
       mkTable maxTupleSize (Tree t) (JC.downIndex i c) j
 
     obj :: JSON.JObject -> Table
     obj jo =
       if M.isEmpty jo
-      then L.singleton $ L.singleton $ Cell { cursor: c, width: t.width, height: one, json: JC.primNull }
+      then L.singleton $ L.singleton $ Cell { cursor: c, width: t.width, height: 1, json: JC.primNull }
       else mergeTableTuples $ labeledTable <$> t.children
       where
         labeledTable :: Tree -> Tuple Int Table
@@ -377,7 +376,7 @@ mergeObjTuple maxTupleSize (Tree t) c ja = do
 
 mergeTableTuples :: List (Tuple Int Table) -> Table
 mergeTableTuples tables =
-  oneColumn <$> (L.range zero $ max zero $ maxh - one)
+  oneColumn <$> (L.range 0 $ max 0 $ maxh - 1)
 
   where
     maxh :: Int
@@ -396,6 +395,6 @@ mergeTableTuples tables =
           rnOr $ L.singleton $ Cell
             { cursor: JC.JCursorTop
             , width: width
-            , height: one
+            , height: 1
             , json: JC.primNull
             }

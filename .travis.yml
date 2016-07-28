@@ -1,15 +1,16 @@
 language: node_js
 dist: trusty
 sudo: required
-node_js: 5
+node_js: 6
 install:
-  - npm install
   - npm install -g bower
-  - bower install
+  - npm install
+  - bower install --production
 script:
-  - npm run build
-  - npm test
-  - npm run example
+  - npm run -s build
+  - bower install
+  - npm run -s example
+  - npm run -s test
 after_success:
 - >-
   test $TRAVIS_TAG &&

@@ -9,14 +9,12 @@ module Data.Json.JTable
 
 import Prelude
 
-import Data.Argonaut.Core (Json())
-import Data.Argonaut.JCursor (JsonPrim())
-import Data.Functor (($>))
+import Data.Array as A
+import Data.Argonaut.Core (Json)
+import Data.Argonaut.JCursor (JsonPrim)
 import Data.Json.JSemantic (toSemanticDef, renderJSemantic)
 import Data.Json.JTable.Internal as JT
-import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts()) as Reexports
-import Data.List (fromList)
-import Data.NaturalTransformation (Natural())
+import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts) as Reexports
 import Data.String (joinWith)
 
 import Halogen as H
@@ -45,7 +43,7 @@ bootstrapStyle = noStyle { table = HI.table [ P.class_ (HI.className "table") ] 
 
 debugStyle :: JT.TableStyle
 debugStyle = noStyle
-  { th = \_ p w h -> HI.th (spans w h) [ HI.text $ joinWith "." $ fromList p ]
+  { th = \_ p w h -> HI.th (spans w h) [ HI.text $ joinWith "." $ A.fromFoldable p ]
   , td = \c j w h ->
            HI.td
              (spans w h)
@@ -83,5 +81,5 @@ jtableComponent opts = HC.component { render, eval }
   render :: Json -> HC.ComponentHTML JT.JTableQuery
   render = renderJTable opts
 
-  eval :: Natural JT.JTableQuery (HC.ComponentDSL Json JT.JTableQuery g)
+  eval :: JT.JTableQuery ~> HC.ComponentDSL Json JT.JTableQuery g
   eval (JT.SetJson json next) = H.modify (const json) $> next

@@ -2,22 +2,21 @@ module Test.Data.Json.JTable where
 
 import Prelude
 
-import Control.Monad.Eff (Eff())
+import Control.Monad.Eff (Eff)
 
-import Data.Argonaut.Core (Json(), JArray())
+import Data.Argonaut.Core (Json, JArray)
 import Data.Argonaut.JCursor (primToJson, primNull)
-import Data.Const (Const())
+import Data.Const (Const)
 import Data.Foldable (for_)
 import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
-import Data.Json.JTable.Internal (Markup())
-import Data.Void (Void())
+import Data.Json.JTable.Internal (Markup)
 
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
-import Halogen.HTML.Renderer.String as H
+import Halogen.HTML.Renderer.String as HS
 
+import Test.Data.Json.TestEffects (TestEffects)
 import Test.StrongCheck (assert, (<?>))
-import Test.Data.Json.TestEffects (TestEffects())
 
 jNull :: Json
 jNull = primToJson primNull
@@ -239,17 +238,17 @@ insertedCase =
 
 assertion :: forall e. TestCase -> Eff (TestEffects e) Unit
 assertion {json: json, msg: msg, html: html} = do
-  let expected = H.renderHTML html
-      actual = H.renderHTML $ renderJTableDef json
+  let expected = HS.renderHTML html
+      actual = HS.renderHTML $ renderJTableDef json
       errorMsg = msg <> "\nactual: " <> actual <> "\nexpected: " <> expected
   assert ((actual == expected) <?> errorMsg)
 
 
 headerCellAssertion :: forall e. TestCase -> Eff (TestEffects e) Unit
 headerCellAssertion {json: json, msg: msg, html: html} = do
-  let expected = H.renderHTML html
+  let expected = HS.renderHTML html
       opts = jTableOptsDefault {insertHeaderCells = true}
-      actual = H.renderHTML $ renderJTable opts json
+      actual = HS.renderHTML $ renderJTable opts json
       errorMsg = "special assertion" <> msg <> "\nactual: " <> actual <> "\nexpected: " <> expected
   assert ((actual == expected) <?> errorMsg)
 

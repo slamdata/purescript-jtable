@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/slamdata/purescript-jtable.svg?branch=master)](https://travis-ci.org/slamdata/purescript-jtable)
 [![Dependency Status](https://www.versioneye.com/user/projects/565c3fb34052e80035000053/badge.svg?style=flat)](https://www.versioneye.com/user/projects/565c3fb34052e80035000053)
 
-A small but powerful Purescript library to render arbitrary JSON into HTML tables.
+A small but powerful PureScript library to render arbitrary JSON into HTML tables.
 
 Turn this:
 
