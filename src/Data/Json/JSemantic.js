@@ -1,19 +1,10 @@
-// module Data.Json.JSemantic
+"use strict";
 
-exports.s2nImpl = function(Just) {
-    return function(Nothing) {
-        return function(s) {
-            var n = s * 1;
-            if (isNaN(n)) {
-                return Nothing;
-            }
-            else {
-                return Just(n);
-            }
-        };
+exports.s2nImpl = function (just) {
+  return function (nothing) {
+    return function (s) {
+      var n = s * 1;
+      return isNaN(n) ? nothing : just(n);
     };
-};
-
-exports.toString = function(d) {
-    return d.toString();
+  };
 };

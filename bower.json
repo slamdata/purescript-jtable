@@ -14,19 +14,20 @@
     "**/.*",
     "bower_components",
     "node_modules",
+    "examples",
     "output",
     "test",
     "bower.json",
     "package.json"
   ],
   "dependencies": {
-    "purescript-argonaut-traversals": "^0.7.0",
-    "purescript-const": "^0.5.0",
-    "purescript-datetime": "^0.9.0",
-    "purescript-halogen": "^0.8.0",
-    "purescript-void": "^0.3.0"
+    "purescript-argonaut-traversals": "^1.0.0",
+    "purescript-const": "^1.0.0",
+    "purescript-datetime": "^1.0.0",
+    "purescript-halogen": "^0.10.0",
+    "purescript-js-date": "^1.2.0"
   },
   "devDependencies": {
-    "purescript-strongcheck": "^0.14.5"
+    "purescript-strongcheck": "^1.0.0"
   }
 }

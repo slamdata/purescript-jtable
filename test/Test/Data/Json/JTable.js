@@ -1,5 +1,3 @@
-// module Test.Data.Json.JTable
-
 exports.j0 = 0;
 exports.jTup2 = ["hi", 1];
 exports.jATup2 = ["hi", 1];
@@ -28,5 +26,3 @@ exports.jArrObj2Tups = [{a: [3, 2, 1],
                         }];
 exports.jMergeObjTup = [{a: {x: 0}, b: 8},
                         {a: [1, 2], b: 9}];
-
-

@@ -2,18 +2,18 @@ module Main where
 
 import Prelude
 
-import Control.Bind ((=<<))
 import Control.Monad.Aff.AVar as Aff
-import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Exception (EXCEPTION())
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception (EXCEPTION)
 
-import Data.Argonaut.Core (Json(), jsonEmptyArray)
+import Data.Argonaut.Core (Json, jsonEmptyArray)
 import Data.Argonaut.Parser (jsonParser)
 import Data.Either (Either(..))
-import Data.Functor.Coproduct (Coproduct())
+import Data.Functor.Coproduct (Coproduct)
 import Data.Json.JTable as J
 import Data.Maybe (Maybe(..))
-import Data.NaturalTransformation (Natural())
+
+import DOM (DOM)
 
 import Halogen as H
 import Halogen.HTML.Events.Indexed as HE
@@ -28,7 +28,7 @@ type DemoSlot = Unit
 type DemoInstalledState g = H.ParentState DemoState Json DemoQuery J.JTableQuery g DemoSlot
 type DemoComponent g = H.Component (DemoInstalledState g) (Coproduct DemoQuery (H.ChildF DemoSlot J.JTableQuery)) g
 type DemoRender g = DemoState -> H.ParentHTML Json DemoQuery J.JTableQuery g DemoSlot
-type DemoEval g = Natural DemoQuery (H.ParentDSL DemoState Json DemoQuery J.JTableQuery g DemoSlot)
+type DemoEval g = DemoQuery ~> H.ParentDSL DemoState Json DemoQuery J.JTableQuery g DemoSlot
 
 ui :: forall g. (Functor g) => J.JTableOpts -> DemoComponent g
 ui opts = H.parentComponent { render, eval, peek: Nothing }
@@ -62,7 +62,7 @@ ui opts = H.parentComponent { render, eval, peek: Nothing }
     pure next
 
 type DemoEffects =
-  ( dom :: DOM.DOM
+  ( dom :: DOM
   , avar :: Aff.AVAR
   , err :: EXCEPTION
   )

@@ -2,17 +2,17 @@ module Test.Data.Json.JSemantic where
 
 import Prelude
 
-import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Console
+import Control.Monad.Eff (Eff, runPure)
+import Control.Monad.Eff.Unsafe (unsafeInterleaveEff)
+import Control.Monad.Eff.Console (log)
 
-import Data.Argonaut.JCursor (JsonPrim(), primNull, primNum, primBool, primStr)
-import Data.Date as D
+import Data.Argonaut.JCursor (JsonPrim, primNull, primNum, primBool, primStr)
 import Data.Json.JSemantic (JSemantic(..), toSemanticDef)
-import Data.Maybe.Unsafe (fromJust)
-import Data.Time (Hours(..), Minutes(..), Seconds(..), Milliseconds(..))
+import Data.JSDate as JSDate
+import Data.Time.Duration (Hours(..), Minutes(..), Seconds(..), Milliseconds(..))
 
+import Test.Data.Json.TestEffects (TestEffects)
 import Test.StrongCheck (assert, (<?>))
-import Test.Data.Json.TestEffects (TestEffects())
 
 assertion
   :: forall eff
@@ -36,8 +36,8 @@ main = do
   assertion "fractional negative" (primNum (-91.349)) (Fractional (-91.349))
   assertion "true" (primBool true) (Bool true)
   assertion "false" (primBool false) (Bool false)
-  assertion "datetime" (primStr d1) (DateTime $ fromJust $ D.fromString d1)
-  assertion "interval" (primStr i) (Interval (fromJust $ D.fromString d1) (fromJust $ D.fromString d2))
+  assertion "datetime" (primStr d1) (DateTime $ parseDate d1)
+  assertion "interval" (primStr i) (Interval (parseDate d1) (parseDate d2))
   assertion "percent 0%" (primStr "0%") (Percent 0.0)
   assertion "percent 0.0%" (primStr "0.0%") (Percent 0.0)
   assertion "percent 13.91%" (primStr "13.91%") (Percent 13.91)
@@ -71,3 +71,4 @@ main = do
   d1 = "1981-04-01T06:55:00+02:00"
   d2 = "2022-12-31T07:14:00+01:00"
   i = d1 <> " - " <> d2
+  parseDate = runPure <<< unsafeInterleaveEff <<< JSDate.parse
