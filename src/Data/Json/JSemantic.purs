@@ -23,7 +23,7 @@ import Data.List ((:))
 import Data.List as L
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Maybe.First (First(..), runFirst)
-import Data.String (split)
+import Data.String (split, stripSuffix, length)
 import Data.String.Regex (Regex(), regex, match, noFlags, parseFlags, replace)
 import Data.Time.Duration as Time
 import Data.JSDate as JSDate
@@ -44,9 +44,14 @@ timeRecToString
   , seconds: (Time.Seconds s)
   , milliseconds: (Time.Milliseconds ms)
   } =
-
-    show h <> ":" <> show m <> ":" <> show s <>
-      if ms > zero then ("." <> show ms) else ""
+    print h <> ":" <> print m <> ":" <> print s <>
+      if ms > 0.0 then ("." <> print ms) else ""
+  where
+  print n =
+    let
+      s = show n
+      s' = fromMaybe s (stripSuffix ".0" s)
+    in if length s' < 2 then "0" <> s' else s'
 
 data JSemantic
   = Integral Int
