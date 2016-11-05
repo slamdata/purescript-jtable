@@ -1,8 +1,7 @@
 # purescript-jtable
 
-[![Latest release](http://img.shields.io/bower/v/purescript-jtable.svg)](https://github.com/slamdata/purescript-jtable/releases)
-[![Build Status](https://travis-ci.org/slamdata/purescript-jtable.svg?branch=master)](https://travis-ci.org/slamdata/purescript-jtable)
-[![Dependency Status](https://www.versioneye.com/user/projects/565c3fb34052e80035000053/badge.svg?style=flat)](https://www.versioneye.com/user/projects/565c3fb34052e80035000053)
+[![Latest release](http://img.shields.io/github/release/slamdata/purescript-jtable.svg)](https://github.com/slamdata/purescript-jtable/releases)
+[![Build status](https://travis-ci.org/slamdata/purescript-jtable.svg?branch=master)](https://travis-ci.org/slamdata/purescript-jtable)
 
 A small but powerful PureScript library to render arbitrary JSON into HTML tables.
 
