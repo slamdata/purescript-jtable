@@ -5,8 +5,8 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Random (RANDOM)
 
 type TestEffects eff =
-  ( err :: EXCEPTION
-  , random :: RANDOM
-  , console :: CONSOLE
+  ( err ∷ EXCEPTION
+  , random ∷ RANDOM
+  , console ∷ CONSOLE
   | eff
   )

@@ -3,7 +3,7 @@ module Test.Data.Json.JSemantic where
 import Prelude
 
 import Control.Monad.Eff (Eff, runPure)
-import Control.Monad.Eff.Unsafe (unsafeInterleaveEff)
+import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Control.Monad.Eff.Console (log)
 
 import Data.Argonaut.JCursor (JsonPrim, primNull, primNum, primBool, primStr)
@@ -15,18 +15,18 @@ import Test.Data.Json.TestEffects (TestEffects)
 import Test.StrongCheck (assert, (<?>))
 
 assertion
-  :: forall eff
-   . String
-  -> JsonPrim
-  -> JSemantic
-  -> Eff (TestEffects eff) Unit
+  ∷ forall eff
+  . String
+  → JsonPrim
+  → JSemantic
+  → Eff (TestEffects eff) Unit
 assertion msg prim expected = do
   log msg
   let actual = toSemanticDef prim
       errMsg = "expected: " <> show expected <> "\nactual: " <> show actual
   assert ((toSemanticDef prim == expected) <?> errMsg)
 
-main :: forall eff. Eff (TestEffects eff) Unit
+main ∷ forall eff. Eff (TestEffects eff) Unit
 main = do
   assertion "null" primNull NA
   assertion "integral positive" (primNum 17.0) (Integral 17)
@@ -71,4 +71,4 @@ main = do
   d1 = "1981-04-01T06:55:00+02:00"
   d2 = "2022-12-31T07:14:00+01:00"
   i = d1 <> " - " <> d2
-  parseDate = runPure <<< unsafeInterleaveEff <<< JSDate.parse
+  parseDate = unsafePerformEff <<< JSDate.parse

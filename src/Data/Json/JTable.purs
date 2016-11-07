@@ -22,29 +22,29 @@ import Halogen.Component as HC
 import Halogen.HTML.Indexed as HI
 import Halogen.HTML.Properties.Indexed as P
 
-renderJsonSimple :: JsonPrim -> String
+renderJsonSimple ∷ JsonPrim → String
 renderJsonSimple j = renderJSemantic $ toSemanticDef j
 
-spans :: forall p r. Int -> Int -> Array (P.IProp (colSpan :: P.I, rowSpan :: P.I | r) p)
+spans ∷ ∀ p r. Int → Int → Array (P.IProp (colSpan ∷ P.I, rowSpan ∷ P.I | r) p)
 spans w h =
   (if w > 1 then [ P.colSpan w ] else [])
     <> (if h > 1 then [ P.rowSpan h ] else [])
 
-noStyle :: JT.TableStyle
+noStyle ∷ JT.TableStyle
 noStyle =
   { table : HI.table_
   , tr : HI.tr_
-  , th : \l _ w h -> HI.th (spans w h) [ HI.text l ]
-  , td : \_ j w h -> HI.td (spans w h) [ HI.text $ renderJsonSimple j ]
+  , th : \l _ w h → HI.th (spans w h) [ HI.text l ]
+  , td : \_ j w h → HI.td (spans w h) [ HI.text $ renderJsonSimple j ]
   }
 
-bootstrapStyle :: JT.TableStyle
+bootstrapStyle ∷ JT.TableStyle
 bootstrapStyle = noStyle { table = HI.table [ P.class_ (HI.className "table") ] }
 
-debugStyle :: JT.TableStyle
+debugStyle ∷ JT.TableStyle
 debugStyle = noStyle
-  { th = \_ p w h -> HI.th (spans w h) [ HI.text $ joinWith "." $ A.fromFoldable p ]
-  , td = \c j w h ->
+  { th = \_ p w h → HI.th (spans w h) [ HI.text $ joinWith "." $ A.fromFoldable p ]
+  , td = \c j w h →
            HI.td
              (spans w h)
              [ HI.small
@@ -55,13 +55,13 @@ debugStyle = noStyle
              ]
   }
 
-inOrdering :: JT.ColumnOrdering
+inOrdering ∷ JT.ColumnOrdering
 inOrdering _ _ _ _ = EQ
 
-alphaOrdering :: JT.ColumnOrdering
+alphaOrdering ∷ JT.ColumnOrdering
 alphaOrdering l1 _ l2 _ = compare l1 l2
 
-jTableOptsDefault :: JT.JTableOpts
+jTableOptsDefault ∷ JT.JTableOpts
 jTableOptsDefault =
   { style: noStyle
   , columnOrdering: inOrdering
@@ -69,17 +69,17 @@ jTableOptsDefault =
   , maxTupleSize: 10
   }
 
-renderJTable :: forall f. JT.JTableOpts -> Json -> JT.Markup f
+renderJTable ∷ ∀ f. JT.JTableOpts → Json → JT.Markup f
 renderJTable = JT.renderJTableRaw
 
-renderJTableDef :: forall f. Json -> JT.Markup f
+renderJTableDef ∷ ∀ f. Json → JT.Markup f
 renderJTableDef = renderJTable jTableOptsDefault
 
-jtableComponent :: forall g. JT.JTableOpts -> HC.Component Json JT.JTableQuery g
+jtableComponent ∷ ∀ g. JT.JTableOpts → HC.Component Json JT.JTableQuery g
 jtableComponent opts = HC.component { render, eval }
   where
-  render :: Json -> HC.ComponentHTML JT.JTableQuery
+  render ∷ Json → HC.ComponentHTML JT.JTableQuery
   render = renderJTable opts
 
-  eval :: JT.JTableQuery ~> HC.ComponentDSL Json JT.JTableQuery g
+  eval ∷ JT.JTableQuery ~> HC.ComponentDSL Json JT.JTableQuery g
   eval (JT.SetJson json next) = H.modify (const json) $> next
