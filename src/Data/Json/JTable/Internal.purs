@@ -162,7 +162,7 @@ renderThead
 renderThead tr thf (Tree t) = H.thead_ $ renderRows tr tdf' $ tablesToRows t.children
   where
     tdf' ∷ Int → Int → Tree → Markup f
-    tdf' y x (Tree t) = thf t.label t.path t.width (height y t.children)
+    tdf' y x (Tree t') = thf t'.label t'.path t'.width (height y t'.children)
 
     height ∷ Int → List Tree → Int
     height i k =

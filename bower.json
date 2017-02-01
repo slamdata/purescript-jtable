@@ -21,13 +21,13 @@
     "package.json"
   ],
   "dependencies": {
-    "purescript-argonaut-traversals": "^2.0.0",
+    "purescript-argonaut-traversals": "^2.0.1",
     "purescript-const": "^2.0.0",
     "purescript-datetime": "^2.0.0",
-    "purescript-halogen": "^0.12.0",
+    "purescript-halogen": "^1.0.0-rc.2",
     "purescript-js-date": "^3.0.0"
   },
   "devDependencies": {
-    "purescript-strongcheck": "^2.0.0"
+    "purescript-strongcheck": "^2.0.2"
   }
 }

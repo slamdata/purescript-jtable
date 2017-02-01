@@ -51,9 +51,9 @@ timeRecToString
   where
   print n =
     let
-      s = show n
-      s' = fromMaybe s (stripSuffix (Pattern ".0") s)
-    in if length s' < 2 then "0" <> s' else s'
+      s' = show n
+      s'' = fromMaybe s' (stripSuffix (Pattern ".0") s')
+    in if length s'' < 2 then "0" <> s'' else s''
 
 data JSemantic
   = Integral Int
