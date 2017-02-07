@@ -2,71 +2,58 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Aff.AVar as Aff
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception (EXCEPTION)
 
-import Data.Argonaut.Core (Json, jsonEmptyArray)
+import Data.Argonaut.Core (jsonEmptyArray)
 import Data.Argonaut.Parser (jsonParser)
 import Data.Either (Either(..))
-import Data.Functor.Coproduct (Coproduct)
 import Data.Json.JTable as J
 import Data.Maybe (Maybe(..))
 
-import DOM (DOM)
-
 import Halogen as H
-import Halogen.HTML.Events.Indexed as HE
-import Halogen.HTML.Indexed as HH
-import Halogen.HTML.Properties.Indexed as HP
-import Halogen.Util (runHalogenAff, awaitBody)
+import Halogen.Aff as HA
+import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Halogen.VDom.Driver (runUI)
 
 type DemoState = String
 data DemoQuery a = SetJsonText String a
-
 type DemoSlot = Unit
-type DemoInstalledState g = H.ParentState DemoState Json DemoQuery J.JTableQuery g DemoSlot
-type DemoComponent g = H.Component (DemoInstalledState g) (Coproduct DemoQuery (H.ChildF DemoSlot J.JTableQuery)) g
-type DemoRender g = DemoState -> H.ParentHTML Json DemoQuery J.JTableQuery g DemoSlot
-type DemoEval g = DemoQuery ~> H.ParentDSL DemoState Json DemoQuery J.JTableQuery g DemoSlot
 
-ui :: forall g. (Functor g) => J.JTableOpts -> DemoComponent g
-ui opts = H.parentComponent { render, eval, peek: Nothing }
+ui ∷ ∀ m. J.JTableOpts → H.Component HH.HTML DemoQuery Unit Void m
+ui opts =
+  H.parentComponent
+    { initialState: const ""
+    , render
+    , eval
+    , receiver: const Nothing
+    }
   where
-  render :: DemoRender g
+  render ∷ DemoState → H.ParentHTML DemoQuery J.JTableQuery DemoSlot m
   render jsonString =
     HH.div
-      [ HP.class_ $ HH.className "container" ]
+      [ HP.class_ $ HH.ClassName "container" ]
       [ HH.h1_ [ HH.text "purescript-jtable demo" ]
       , HH.p_ [ HH.text "Paste some JSON:" ]
       , HH.p_
           [ HH.textarea
-              [ HP.class_ $ HH.className "form-control"
+              [ HP.class_ $ HH.ClassName "form-control"
               , HP.value jsonString
               , HE.onValueInput $ HE.input SetJsonText
               ]
           ]
       , HH.h2_ [ HH.text "Output" ]
-      , HH.slot unit \_ ->
-          { component : J.jtableComponent opts
-          , initialState : jsonEmptyArray
-          }
+      , HH.slot unit (J.jtableComponent opts) unit absurd
       ]
 
-  eval :: DemoEval g
+  eval ∷ DemoQuery ~> H.ParentDSL DemoState DemoQuery J.JTableQuery DemoSlot Void m
   eval (SetJsonText jsonString next) = do
     H.query unit <<< H.action <<< J.SetJson $
       case jsonParser jsonString of
-        Left _ -> jsonEmptyArray
-        Right json -> json
+        Left _ → jsonEmptyArray
+        Right json → json
     pure next
 
-type DemoEffects =
-  ( dom :: DOM
-  , avar :: Aff.AVAR
-  , err :: EXCEPTION
-  )
-
-main :: Eff DemoEffects Unit
-main = runHalogenAff $
-  H.runUI (ui J.jTableOptsDefault) (H.parentState "") =<< awaitBody
+main ∷ Eff (HA.HalogenEffects ()) Unit
+main = HA.runHalogenAff $ runUI (ui J.jTableOptsDefault) unit =<< HA.awaitBody

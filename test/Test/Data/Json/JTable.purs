@@ -10,10 +10,15 @@ import Data.Const (Const)
 import Data.Foldable (for_)
 import Data.Json.JTable (renderJTable, renderJTableDef, jTableOptsDefault)
 import Data.Json.JTable.Internal (Markup)
+import Data.String as Str
+import Data.Tuple (Tuple(..))
+import Data.Maybe (maybe)
+import Data.Newtype (unwrap)
 
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
-import Halogen.HTML.Renderer.String as HS
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
+import Halogen.VDom as VD
+import Halogen.VDom.DOM.Prop as VDP
 
 import Test.Data.Json.TestEffects (TestEffects)
 import Test.StrongCheck (assert, (<?>))
@@ -219,7 +224,7 @@ insertedCase ∷ TestCase
 insertedCase =
   { json: jObj2Obj2
   , msg: "jObj2Obj2"
-  , html: H.table_ [ H.thead_ [ H.tr_ [ H.th_ [ ]
+  , html: H.table_ [ H.thead_ [ H.tr_ [ H.th_ [ H.text "" ]
                                       , H.th [P.colSpan 2] [ H.text "b" ]
                                       ]
                               , H.tr_ [ H.th_ [ H.text "a"]
@@ -238,19 +243,56 @@ insertedCase =
 
 assertion ∷ ∀ e. TestCase → Eff (TestEffects e) Unit
 assertion {json: json, msg: msg, html: html} = do
-  let expected = HS.renderHTML html
-      actual = HS.renderHTML $ renderJTableDef json
+  let expected = render html
+      actual = render $ renderJTableDef json
       errorMsg = msg <> "\nactual: " <> actual <> "\nexpected: " <> expected
   assert ((actual == expected) <?> errorMsg)
 
 
 headerCellAssertion ∷ ∀ e. TestCase → Eff (TestEffects e) Unit
 headerCellAssertion {json: json, msg: msg, html: html} = do
-  let expected = HS.renderHTML html
+  let expected = render html
       opts = jTableOptsDefault {insertHeaderCells = true}
-      actual = HS.renderHTML $ renderJTable opts json
+      actual = render $ renderJTable opts json
       errorMsg = "special assertion" <> msg <> "\nactual: " <> actual <> "\nexpected: " <> expected
   assert ((actual == expected) <?> errorMsg)
+
+render ∷ ∀ p i. H.HTML p i → String
+render = printVDom <<< unwrap
+  where
+  printVDom = case _ of
+    VD.Text s →
+      "Text " <> show s
+    VD.Elem es children →
+      "Elem "
+        <> printElemSpec es
+        <> " [" <> Str.joinWith ", " (map printVDom children)
+        <> "]"
+    VD.Keyed es children →
+      "Keyed "
+        <> printElemSpec es
+        <> " [" <> Str.joinWith ", " (map (\(Tuple k v) → "Tuple " <> show k <> " " <> printVDom v) children)
+        <> "]"
+    VD.Widget _ →
+      "Widget ?w"
+    VD.Grafted g →
+      printVDom (VD.runGraft g)
+  printElemSpec (VD.ElemSpec ns name attrs) =
+    "(ElemSpec "
+      <> printNamespace ns <> " "
+      <> printElemName name
+      <> " [" <> Str.joinWith ", " (map printAttr attrs) <> "])"
+  printNamespace =
+    maybe "Nothing" (\ns → "(Just (Namespace " <> show (unwrap ns) <> "))")
+  printElemName name =
+    "(ElemName " <> show (unwrap name) <> ")"
+  printAttr = case _ of
+    VDP.Attribute ns k v → "Attribute " <> printNamespace ns <> " " <> show k <> " " <> show v
+    VDP.Property k v → "Property " <> show k <> " " <> propValueToString v
+    VDP.Handler et _ → "Handler (EventType " <> show (unwrap et) <> ") ?handler"
+    VDP.Ref r → "Ref ?ref"
+
+foreign import propValueToString ∷ VDP.PropValue → String
 
 main ∷ ∀ eff. Eff (TestEffects eff) Unit
 main = do

@@ -2,7 +2,7 @@ module Test.Data.Json.JSemantic where
 
 import Prelude
 
-import Control.Monad.Eff (Eff, runPure)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Control.Monad.Eff.Console (log)
 
