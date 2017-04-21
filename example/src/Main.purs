@@ -49,7 +49,7 @@ ui opts =
 
   eval ∷ DemoQuery ~> H.ParentDSL DemoState DemoQuery J.JTableQuery DemoSlot Void m
   eval (SetJsonText jsonString next) = do
-    H.query unit <<< H.action <<< J.SetJson $
+    _ ← H.query unit <<< H.action <<< J.SetJson $
       case jsonParser jsonString of
         Left _ → jsonEmptyArray
         Right json → json
