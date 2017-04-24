@@ -236,7 +236,7 @@ treeFromJson maxTupleSize label path = foldJsonPrim (const prim) array obj
           treeFromJson maxTupleSize l (L.snoc path l) j
 
         children ∷ List Tree
-        children = assocToTree <$> M.toList jo
+        children = assocToTree <$> M.toUnfoldable jo
 
         width ∷ Int
         width = foldl (+) 0 $ (runTree >>> _.width) <$> children
@@ -246,9 +246,9 @@ treeFromJson maxTupleSize label path = foldJsonPrim (const prim) array obj
 
 widthOfPrimTuple ∷ Int → JPath → JSON.JArray → Maybe Int
 widthOfPrimTuple maxTupleSize path ja = do
-  L.head path
-  ja A.!! 1
-  for ja toPrim
+  _ ← L.head path
+  _ ← ja A.!! 1
+  _ ← for ja toPrim
   let l = A.length ja
   guard $ l <= maxTupleSize
   pure l
@@ -321,7 +321,7 @@ mkTable maxTupleSize (Tree t) c = foldJsonPrim prim array obj
 
     primtup ∷ JSON.JArray → Maybe Table
     primtup ja = do
-      width ja
+      _ ← width ja
       pure $ L.singleton $ mkCells <$> (L.range 0 (t.width - 1))
       where
         mkCells ∷ Int → Cell
@@ -353,7 +353,7 @@ mkTable maxTupleSize (Tree t) c = foldJsonPrim prim array obj
 
 mergeObjTuple ∷ Int → Tree → JC.JCursor → JSON.JArray → Maybe Table
 mergeObjTuple maxTupleSize (Tree t) c ja = do
-  A.head ja
+  _ ← A.head ja
   jos ← for ja JSON.toObject
   let
     kss ∷ Array (Array String)
