@@ -154,6 +154,9 @@ rxTime = rx """^([01]?[0-9]|2[0-3]):([0-5][0-9])(:([0-5][0-9]))*(.([0-9]{3}))*$"
 rxPercent ∷ Regex
 rxPercent = rx """^(-?\d+(\.\d+)?)\%$"""
 
+rxGuardNum ∷ Regex
+rxGuardNum = rx """^[+-]?([1-9]|0?\.|0$)"""
+
 integralNum ∷ Number → Maybe JSemantic
 integralNum n = Integral <$> fromNumber n
 
@@ -222,10 +225,14 @@ intervalString s = do
   pure $ Interval d1 d2
 
 integralString ∷ String → Maybe JSemantic
-integralString s = Integral <$> (s2n s >>= fromNumber)
+integralString s = do
+  _ ← match rxGuardNum s
+  Integral <$> (s2n s >>= fromNumber)
 
 fractionalString ∷ String → Maybe JSemantic
-fractionalString s = Fractional <$> s2n s
+fractionalString s = do
+  _ ← match rxGuardNum s
+  Fractional <$> s2n s
 
 textString ∷ String → Maybe JSemantic
 textString s = pure $ Text s

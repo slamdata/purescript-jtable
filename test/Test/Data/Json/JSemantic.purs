@@ -52,8 +52,11 @@ main = do
   assertion "integral -100" (primStr "-100") (Integral (-100))
   assertion "integral 100.00" (primStr "100.00") (Integral 100)
   assertion "integral 0" (primStr "0") (Integral 0)
+  assertion "integral 0." (primStr "0.") (Integral 0)
   assertion "fractional 123.45" (primStr "123.45") (Fractional 123.45)
   assertion "fractional -234.56" (primStr "-234.56") (Fractional (-234.56))
+  assertion "fractional 0.2" (primStr "0.2") (Fractional 0.2)
+  assertion "fractional .2" (primStr ".2") (Fractional 0.2)
   assertion "time 12:34:56" (primStr "12:34:56") (Time { hours: Hours 12.0
                                                        , minutes: Minutes 34.0
                                                        , seconds: Seconds 56.0
@@ -66,6 +69,7 @@ main = do
           , milliseconds: Milliseconds 123.0
           })
   assertion "incorrect time 56:12:12" (primStr "56:12:12") (Text "56:12:12")
+  assertion "leading zeros" (primStr "00123") (Text "00123")
 
   where
   d1 = "1981-04-01T06:55:00+02:00"
