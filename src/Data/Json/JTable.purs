@@ -1,5 +1,5 @@
 module Data.Json.JTable
-  ( renderJTable, renderJTableDef
+  ( renderJTable, renderJTableDef, renderJsonSimple
   , jTableOptsDefault
   , inOrdering, alphaOrdering
   , noStyle, bootstrapStyle, debugStyle
@@ -10,41 +10,47 @@ module Data.Json.JTable
 import Prelude
 
 import Data.Argonaut.Core as J
-import Data.Argonaut.JCursor (JsonPrim)
+import Data.Argonaut.JCursor (JsonPrim, runJsonPrim)
 import Data.Array as A
-import Data.Json.JSemantic (toSemanticDef, renderJSemantic)
 import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts) as Reexports
 import Data.Json.JTable.Internal as JT
-import Data.Maybe (Maybe(..))
-import Data.String (joinWith)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String as S
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
 renderJsonSimple ∷ JsonPrim → String
-renderJsonSimple j = renderJSemantic $ toSemanticDef j
+renderJsonSimple j = runJsonPrim j (const "") show showNumber id
+  where
+  showNumber n =
+    let s = show n
+    in fromMaybe s (S.stripSuffix (S.Pattern ".0") s)
 
 spans ∷ ∀ p r. Int → Int → Array (HP.IProp (colSpan ∷ Int, rowSpan ∷ Int | r) p)
 spans w h =
   (if w > 1 then [ HP.colSpan w ] else [])
     <> (if h > 1 then [ HP.rowSpan h ] else [])
 
-noStyle ∷ JT.TableStyle
-noStyle =
-  { table : HH.table_
-  , tr : HH.tr_
-  , th : \l _ w h → HH.th (spans w h) [ HH.text l ]
-  , td : \_ j w h → HH.td (spans w h) [ HH.text $ renderJsonSimple j ]
+noStyle ∷ (JsonPrim → String) → JT.TableStyle
+noStyle renderJson =
+  { table: HH.table_
+  , tr: HH.tr_
+  , th: \l _ w h → HH.th (spans w h) [ HH.text l ]
+  , td: \_ j w h → HH.td (spans w h) [ HH.text $ renderJson j ]
   }
 
-bootstrapStyle ∷ JT.TableStyle
-bootstrapStyle = noStyle { table = HH.table [ HP.class_ (H.ClassName "table") ] }
+bootstrapStyle ∷ (JsonPrim → String) → JT.TableStyle
+bootstrapStyle renderJson = (noStyle renderJson)
+  { table = HH.table [ HP.class_ (H.ClassName "table") ] }
 
 debugStyle ∷ JT.TableStyle
-debugStyle = noStyle
-  { th = \_ p w h → HH.th (spans w h) [ HH.text $ joinWith "." $ A.fromFoldable p ]
-  , td = \c j w h →
+debugStyle =
+  { table: HH.table_
+  , tr: HH.tr_
+  , th: \_ p w h → HH.th (spans w h) [ HH.text $ S.joinWith "." $ A.fromFoldable p ]
+  , td: \c j w h →
            HH.td
              (spans w h)
              [ HH.small
@@ -63,7 +69,7 @@ alphaOrdering l1 _ l2 _ = compare l1 l2
 
 jTableOptsDefault ∷ JT.JTableOpts
 jTableOptsDefault =
-  { style: noStyle
+  { style: noStyle renderJsonSimple
   , columnOrdering: inOrdering
   , insertHeaderCells: false
   , maxTupleSize: 10
