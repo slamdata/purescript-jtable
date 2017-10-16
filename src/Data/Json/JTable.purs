@@ -16,13 +16,14 @@ import Data.Json.JTable.Internal (JTableQuery(..), JTableOpts) as Reexports
 import Data.Json.JTable.Internal as JT
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as S
-
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
-renderJsonSimple ∷ JsonPrim → String
-renderJsonSimple j = runJsonPrim j (const "") show showNumber id
+type BasicHTML = HH.HTML Void Void
+
+renderJsonSimple ∷ JsonPrim → BasicHTML
+renderJsonSimple j = HH.text $ runJsonPrim j (const "") show showNumber id
   where
   showNumber n =
     let s = show n
@@ -33,15 +34,15 @@ spans w h =
   (if w > 1 then [ HP.colSpan w ] else [])
     <> (if h > 1 then [ HP.rowSpan h ] else [])
 
-noStyle ∷ (JsonPrim → String) → JT.TableStyle
+noStyle ∷ (JsonPrim → BasicHTML) → JT.TableStyle
 noStyle renderJson =
   { table: HH.table_
   , tr: HH.tr_
   , th: \l _ w h → HH.th (spans w h) [ HH.text l ]
-  , td: \_ j w h → HH.td (spans w h) [ HH.text $ renderJson j ]
+  , td: \_ j w h → HH.td (spans w h) [ map absurd $ renderJson j ]
   }
 
-bootstrapStyle ∷ (JsonPrim → String) → JT.TableStyle
+bootstrapStyle ∷ (JsonPrim → BasicHTML) → JT.TableStyle
 bootstrapStyle renderJson = (noStyle renderJson)
   { table = HH.table [ HP.class_ (H.ClassName "table") ] }
 
