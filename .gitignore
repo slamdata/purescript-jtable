@@ -8,3 +8,4 @@ node_modules/
 output/
 example/example.js
 example/.*
+package-lock.json
